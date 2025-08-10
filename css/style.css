@@ -24,7 +24,6 @@ body {
     opacity: 0;
     background-color: #fff;
     color: #000;
-    z-index: -9999;
 }
 
 /* 自作の画像（アイコン）に差し替え予定 */
@@ -50,12 +49,18 @@ canvas {
 
 #background {
     z-index: 1;
+    pointer-events: none;
 }
 
-#keyborad {
+#Wkey_ui {
     z-index: 2;
 }
 
+#Bkey {
+    z-index: 3;
+}
+
+/* テスト用 */
 button {
     width: 100px;
     height: 50px;

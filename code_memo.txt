@@ -1,0 +1,7 @@
+白鍵間の黒い線
+
+context.strokeStyle = '#000';
+context.beginPath();
+context.moveTo(0, editor_height_start + i * white_keyboard_height);
+context.lineTo(white_keyboard_width, editor_height_start + i * white_keyboard_height);
+context.stroke();

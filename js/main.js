@@ -20,8 +20,11 @@ const instrument_view = new Map([
 ]);
 
 document.getElementById('start_display').addEventListener('click', async () => {
+    document.getElementById('start_display').innerHTML = `
+        <h1>Museopica</h1>
+        <h6>読み込み中...</h6>
+    `;
 
-    document.getElementById('start_display').classList.add('clicked'); // タイトル画面フェードアウト
     if (!audio_ctx) {
         audio_ctx = new AudioContext();
         await audio_ctx.resume();
@@ -32,13 +35,27 @@ document.getElementById('start_display').addEventListener('click', async () => {
     };
 
     console.log(instrument);
+
+    document.getElementById('start_display').innerHTML = `
+        <h1>Museopica</h1>
+        <h6>完了！</h6>
+    `;
+
+    setTimeout(() => {
+        document.getElementById('start_display').classList.add('clicked'); // タイトル画面フェードアウト
+    }, 2000);
+
+    setTimeout(() => {
+        document.getElementById('start_display').style.zIndex = -9999;
+    }, 4000);
 });
 
 let bpm = 60; // テンポ
-let SPB = 60 / bpm; // 1拍の長さ（秒）
-let instrument_number = 1;  // 1~11
+let SPB = 60 / bpm; // 1拍の長さ（s）
+let instrument_number = 1;  // 楽器番号（1~11）
 let p = 1; //仮
 
+// 再生テスト処理
 button.addEventListener('click', async () => {
     let c = 60 - 0;
 
@@ -57,7 +74,7 @@ button.addEventListener('click', async () => {
 });
 
 
-
+// テスト用
 document.getElementById('button2').addEventListener('click', () => {
     if (instrument_number == 11) {
         instrument_number = 11;
