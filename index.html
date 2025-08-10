@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Museopica</title>
+</head>
+
+<body>
+
+    <div id="app">
+        <center>
+            <div id="start_display">
+                <h1>Museopica</h1>
+                <h6>クリックして開始</h6>
+            </div>
+            <canvas id="background"></canvas>
+            <canvas id="keyboard"></canvas>
+        </center>
+    </div>
+
+    <button id="button">クリックしてね</button>
+    <button id="button2">大</button>
+    <button id="button3">小</button>
+    <button id="button4">切り替え</button>
+
+    <script src="src/resize_window.js"></script>
+    <script src="dist/soundfont-player.js"></script>
+    <script type="module" src="src/test.js"></script>
+</body>
+
+</html>
