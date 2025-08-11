@@ -47,7 +47,7 @@ function resize_canvas(all_canvas) {
             context.fillRect(0, 0, width, height);
 
             // UI背景の描画
-            // context.fillStyle = '#0000005e';
+            context.fillStyle = '#0000005e';
             context.fillRect(0, 0, width, height * 0.04);
             context.fillRect(0, height * 0.96, width, height);
 
@@ -60,15 +60,15 @@ function resize_canvas(all_canvas) {
 
             for (let i = 0; i <= 36 + 9; i++) {
                 // 横線
-                context.moveTo(editor_width_start, editor_height_start + i * white_keyboard_height);
-                context.lineTo(editor_width_end, editor_height_start + i * white_keyboard_height);
+                context.moveTo(editor_width_start, editor_height_start + (i * white_keyboard_height));
+                context.lineTo(editor_width_end, editor_height_start + (i * white_keyboard_height));
             };
 
             for (let i = 1; i <= 64; i++) {
                 // 縦線
                 if (!(i % 4 == 0)) {
-                    context.moveTo(editor_width_start + i * quarterbeat_width, editor_height_start);
-                    context.lineTo(editor_width_start + i * quarterbeat_width, editor_height_end);
+                    context.moveTo(editor_width_start + (i * quarterbeat_width), editor_height_start);
+                    context.lineTo(editor_width_start + (i * quarterbeat_width), editor_height_end);
                 };
             };
 
@@ -80,8 +80,8 @@ function resize_canvas(all_canvas) {
 
             for (let i = 1; i <= 64; i++) {
                 if (i % 4 == 0 && !(i % 16 == 0)) {
-                    context.moveTo(editor_width_start + i * quarterbeat_width, editor_height_start);
-                    context.lineTo(editor_width_start + i * quarterbeat_width, editor_height_end);
+                    context.moveTo(editor_width_start + (i * quarterbeat_width), editor_height_start);
+                    context.lineTo(editor_width_start + (i * quarterbeat_width), editor_height_end);
                 };
             };
 
@@ -94,8 +94,8 @@ function resize_canvas(all_canvas) {
 
             for (let i = 1; i <= 64; i++) {
                 if (i % 16 == 0) {
-                    context.moveTo(editor_width_start + i * quarterbeat_width, editor_height_start);
-                    context.lineTo(editor_width_start + i * quarterbeat_width, editor_height_end);
+                    context.moveTo(editor_width_start + (i * quarterbeat_width), editor_height_start);
+                    context.lineTo(editor_width_start + (i * quarterbeat_width), editor_height_end);
                 };
             };
 
@@ -108,8 +108,8 @@ function resize_canvas(all_canvas) {
 
             for (let i = 0; i < 36; i++) {
                 if (i % 7 == 1 || i % 7 == 5) {
-                    context.moveTo(editor_width_start, editor_height_start + i * white_keyboard_height);
-                    context.lineTo(editor_width_end, editor_height_start + i * white_keyboard_height);
+                    context.moveTo(editor_width_start, editor_height_start + (i * white_keyboard_height));
+                    context.lineTo(editor_width_end, editor_height_start + (i * white_keyboard_height));
                 };
             };
 
@@ -119,8 +119,8 @@ function resize_canvas(all_canvas) {
             context.lineWidth = 1;
             context.strokeStyle = '#4acc00';
             context.beginPath();
-            context.moveTo(editor_width_start, editor_height_start + 36 * white_keyboard_height);
-            context.lineTo(editor_width_end, editor_height_start + 36 * white_keyboard_height);
+            context.moveTo(editor_width_start, editor_height_start + (36 * white_keyboard_height));
+            context.lineTo(editor_width_end, editor_height_start + (36 * white_keyboard_height));
             context.stroke();
         };
 
@@ -129,13 +129,31 @@ function resize_canvas(all_canvas) {
             // 鍵盤の描画
             for (let i = 0; i < 36 + 9; i++) {
                 context.fillStyle = '#fff';
-                context.fillRect(0, editor_height_start + i * white_keyboard_height, white_keyboard_width, white_keyboard_height);
+                context.fillRect(0, editor_height_start + (i * white_keyboard_height), white_keyboard_width, white_keyboard_height);
             };
         };
 
-        // 黒鍵盤の描画(Bkey)
+        // 黒鍵の描画(Bkey)
         if (c == 3) {
-
+            context.fillStyle = '#000';
+            for (let i = 1; i < 36; i++) {
+                if (i % 7 == 2) {
+                    // A#(ラ#)
+                    context.fillRect(0, editor_height_start + (i * white_keyboard_height) - (black_keyboard_height / 2), black_keyboard_width, black_keyboard_height);
+                } else if (i % 7 == 3) {
+                    // G#(ソ#)
+                    context.fillRect(0, editor_height_start + (i * white_keyboard_height) - (black_keyboard_height / 2), black_keyboard_width, black_keyboard_height);
+                } else if (i % 7 == 4) {
+                    // F#(ファ#)
+                    context.fillRect(0, editor_height_start + (i * white_keyboard_height) - (black_keyboard_height / 2), black_keyboard_width, black_keyboard_height);
+                } else if (i % 7 == 6) {
+                    // D#(レ#)
+                    context.fillRect(0, editor_height_start + (i * white_keyboard_height) - (black_keyboard_height / 2), black_keyboard_width, black_keyboard_height);
+                } else if (i % 7 == 0) {
+                    // C#(ド#)
+                    context.fillRect(0, editor_height_start + (i * white_keyboard_height) - (black_keyboard_height / 2), black_keyboard_width, black_keyboard_height);
+                };
+            };
         };
 
         // 白鍵盤間の線・鍵盤上の文字・画像表示
@@ -146,8 +164,8 @@ function resize_canvas(all_canvas) {
             context.beginPath();
 
             for (let i = 1; i < 36 + 9; i++) {
-                context.moveTo(0, editor_height_start + i * white_keyboard_height);
-                context.lineTo(white_keyboard_width, editor_height_start + i * white_keyboard_height);
+                context.moveTo(0, editor_height_start + (i * white_keyboard_height));
+                context.lineTo(white_keyboard_width, editor_height_start + (i * white_keyboard_height));
             };
 
             context.stroke();
