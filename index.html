@@ -1,38 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="css/style.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Museopica</title>
+    </head>
 
-<head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="css/style.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Museopica</title>
-</head>
-
-<body>
-
-    <div id="app">
-        <center>
-            <!-- <div id="start_display">
+    <body>
+        <div id="app">
+            <div id="start_display">
                 <h1>Museopica</h1>
                 <h6>クリックして開始</h6>
-            </div> -->
+                <p>v0.6</p>
+            </div>
+
             <canvas id="background"></canvas> <!-- 背景描画用 -->
-            <canvas id="Wkey_ui"></canvas> <!-- 白鍵・UI描画用 -->
-            <canvas id="Bkey"></canvas> <!-- 黒鍵描画用 -->
+            <canvas id="key_ui"></canvas> <!-- 鍵盤・UI描画用 -->
             <canvas id="key_display"></canvas> <!-- キー背景描画用 -->
-        </center>
-    </div>
+        </div>
 
-    <!-- <button id="button">クリックしてね</button>
-    <button id="button2">大</button>
-    <button id="button3">小</button>
-    <button id="button4">切り替え</button> -->
-
-    <script src="js/resize_window.js"></script>
-    <!-- <script src="/public/soundfont-player/soundfont-player.js"></script> --> <!-- ローカル・テスト用 -->
-    <script src="/Museopica/public/soundfont-player/soundfont-player.js"></script> <!-- 公開用 -->
-    <script type="module" src="js/main.js"></script>
-</body>
-
+        <script src="js/resize_window.js"></script>
+        <!-- ローカル・テスト用 -->
+        <script src="/public/soundfont-player/soundfont-player.js"></script>
+        <!-- 公開用 -->
+        <!-- <script src="/Museopica/public/soundfont-player/soundfont-player.js"></script> -->
+        <script type="module" src="js/main.js"></script>
+        <script src="js/keyboards.js"></script>
+    </body>
 </html>
