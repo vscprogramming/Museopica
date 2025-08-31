@@ -62,7 +62,7 @@ function resize_canvas(all_canvas) {
 
             for (let i = 1; i <= 64; i++) {
                 // 縦線
-                if (!(i % 4 == 0)) {
+                if (i % 4 != 0) {
                     context.moveTo(editor_width_start + (i * quarterbeat_width), editor_height_start);
                     context.lineTo(editor_width_start + (i * quarterbeat_width), editor_height_end);
                 }
@@ -75,7 +75,7 @@ function resize_canvas(all_canvas) {
             context.beginPath();
 
             for (let i = 1; i <= 64; i++) {
-                if (i % 4 == 0 && !(i % 16 == 0)) {
+                if (i % 4 == 0 && i % 16 != 0) {
                     context.moveTo(editor_width_start + (i * quarterbeat_width), editor_height_start);
                     context.lineTo(editor_width_start + (i * quarterbeat_width), editor_height_end);
                 }
