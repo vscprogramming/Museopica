@@ -56,11 +56,7 @@ canvas {
 }
 
 #key_ui { z-index: 2; }
-
-#Bkey {
-    z-index: 3;
-    
-}
+#Bkey { z-index: 3; }
 
 #key_display {
     z-index: 4;
