@@ -1,32 +1,37 @@
 <!DOCTYPE html>
-
 <html lang="ja">
     <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="css/style.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="css/style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="With You Once More ♪">
+        <script src="https://unpkg.com/soundfont-player/dist/soundfont-player.js"></script>
         <title>Museopica</title>
     </head>
-
     <body>
         <div id="app">
-            <div id="start_display">
-                <h1>Museopica</h1>
-                <h6>クリックして開始</h6>
-                <p>v0.6</p>
+            <div id="top_ui">
+                <button id="file_btn" class="ui_btn">ファイル</button>
+                <label for="inst_select" class="label">楽器選択</label>
+                <select id="inst_select" class="pulldown" name="instrument">
+                    <!-- optionはjsで追加 -->
+                </select>
+                <label for="dur_select" class="label">拍数選択</label>
+                <select id="dur_select" class="pulldown" name="duration">
+                    <!-- optionはjsで追加 -->
+                </select>
             </div>
-
-            <canvas id="background"></canvas> <!-- 背景描画用 -->
-            <canvas id="key_ui"></canvas> <!-- 鍵盤・UI描画用 -->
-            <canvas id="key_display"></canvas> <!-- キー背景描画用 -->
+            <div id="editor">
+                <div id="keyboards">
+                    <div id="white_keyboards"></div>
+                    <div id="black_keyboards"></div>
+                    <div id="drums_keyboards"></div>
+                </div>
+                <canvas id="grid"></canvas>
+            </div>
+            <div id="bottom_ui"></div>
+            <div id="modal_div"></div>
         </div>
-
-        <script src="js/resize_window.js"></script>
-        <!-- ローカル・テスト用 -->
-        <script src="/public/soundfont-player/soundfont-player.js"></script>
-        <!-- 公開用 -->
-        <!-- <script src="/Museopica/public/soundfont-player/soundfont-player.js"></script> -->
-        <script type="module" src="js/main.js"></script>
-        <script src="js/keyboards.js"></script>
+        <script src="js/script.js"></script>
     </body>
 </html>

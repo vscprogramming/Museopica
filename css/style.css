@@ -1,73 +1,148 @@
+/*
+    ◯変数解説
+        --key-wh: 白鍵のheight
+        --key-bk: 黒鍵のheight
+*/
+
+:root {
+    --key-wh: calc(1 / 27 * 90vh);
+    --key-bh: calc(1 / 27 * 90vh * 0.6);
+}
+
 html, body {
-    height: 100%;
+    /* width: 100vw; height: 100vh; */
     margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffd900;
-}
-
-#start_display {
-    z-index: 9999;
-    position: absolute;
-    text-align: center;
     background-color: #000;
-    color: #fff;
-    width: 100%; height: 100%;
-    transition: all 2s;
-    opacity: 1;
-}
-
-#start_display.clicked {
-    opacity: 0;
-    background-color: #fff;
-    color: #000;
-}
-
-/* 自作の画像（アイコン）に差し替え予定 */
-h1 {
-    margin-top: 25%;
-    font-size: 10vh;
-}
-
-h6 { font-size: 3vh; }
-
-p {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    font-size: 2.7vh;
 }
 
 #app {
-    position: relative;
-    display: inline-block;
-}
-
-/* canvasラッシュ */
-canvas {
+    top: 50%; left: 50%;
+    width: 100%; height: 100%;
+    display: flex;
     position: absolute;
+    flex-direction: column;
+    transform: translate(-50%, -50%);
+}
+
+#top_ui, #bottom_ui {
     top: 0; left: 0;
+    width: 100%; height: 5%;
+    background-color: #141414dd;
 }
 
-#background {
+.ui_btn {
+    width: 7%; height: 100%;
+    border: none;
+    color: #eee;
+    font-size: 134%;
+    background-color: #000;
+    transition: background-color .2s;
+}
+
+.ui_btn:hover {
+    background-color: #333;
+}
+
+.label {
+    display: none;
+}
+
+.pulldown {
+    width: 14%; height: 50%;
+    margin-left: 3%;
+    text-align: center;
+    border-radius: 18px;
+    background-color: #eee;
+}
+
+#editor {
+    top: 0; left: 0;
+    width: 100%; height: 90%;
+    display: flex;
+    flex-direction: row;
+}
+
+#keyboards {
+    width: 10.5%; height: 100%;
+    z-index: 0;
+    position: relative;
+    background-color: #fff;
+}
+
+#white_keyboards { 
+    width: 100%; height: calc(var(--key-wh) * 22);
     z-index: 1;
-    pointer-events: none;
+    display: flex;
+    position: absolute;
+    flex-direction: column;
 }
 
-#key_ui { z-index: 2; }
-#Bkey { z-index: 3; }
-
-#key_display {
-    z-index: 4;
-    pointer-events: none;
+.white_key, .drum_key {
+    width: 100%; height: var(--key-wh);
+    border: none;
+    border-top: 1px solid #000;
 }
 
-/* canvasラッシュ 終わり */
+/* 未確定箇所　ここから */
+.white_key {
+    background-color: #aaf;
+}
 
-/* テスト用 */
-button {
-    width: 100px; height: 50px;
-    background-color: #f00;
-    color: #fff;
+.white_key:hover {
+    background-color: #77f;
+}
+/* 未確定箇所　ここまで */
+
+
+#black_keyboards {
+    width: 62%; height: calc(var(--key-wh) * 22);
+    z-index: 2;
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    /* background-color: #00f7; */
+}
+
+#black_keyboards .black_key:nth-child(1) {
+    margin-top: calc((var(--key-wh) * 2) - (var(--key-bh) / 2));
+}
+
+#black_keyboards .black_key:nth-child(5n),
+#black_keyboards .black_key:nth-child(5n+2),
+#black_keyboards .black_key:nth-child(5n+3) {
+    margin-top: calc(var(--key-wh) - var(--key-bh));
+}
+
+#black_keyboards .black_key:nth-child(5n+1):not(:nth-child(1)),
+#black_keyboards .black_key:nth-child(5n+4) {
+    margin-top: calc((var(--key-wh) * 2) - var(--key-bh));
+}
+
+.black_key {
+    width: 100%; height: var(--key-bh);
+    background-color: #000;
+}
+
+#drums_keyboards {
+    width: 100%; height: calc(var(--key-wh) * 5);
+    z-index: 1;
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    top: calc(var(--key-wh) * 22);
+}
+
+/* 未確定箇所　ここから */
+.drum_key {
+    background-color: #afa;
+}
+
+.drum_key:hover {
+    background-color: #7f7;
+}
+/* 未確定箇所　ここまで */
+
+#grid {
+    width: 89.5%; height: 100%;
+    background-color: #333;
 }

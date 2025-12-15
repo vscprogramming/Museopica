@@ -1,0 +1,7 @@
+横幅（width） ： 縦幅（height）＝ 16 : 9
+
+if (横幅（width） ＞＝ 縦幅（height）) {
+    // 縦幅（height）を基準に
+} else if (横幅（width） ＜＝ 縦幅（height）) {
+    // 横幅（width）を基準に
+}
