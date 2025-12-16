@@ -10,7 +10,6 @@
         audio_context = ?
         instruments = 読み込んだ楽器
         current_instrument = 現在選択されている読み込まれた楽器
-        sinkaikai = 赤巻上青巻紙
 */
 
 let inst_id, instruments = [], current_instrument;
@@ -18,11 +17,11 @@ let tempo = 100;
 const audio_context = new AudioContext();
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // ローディング表示処理
+    document.getElementById('loading').style.display = 'flex';
     keys_generation();
     await UI_prepare();
     key_click();
-    // ローディング非表示処理
+    document.getElementById('loading').style.display = 'none';
 });
 
 function keys_generation() {
@@ -54,14 +53,14 @@ function keys_generation() {
     const black_flag = document.createDocumentFragment();
     const drums_flag = document.createDocumentFragment();
 
-    for (let i = 1; i <= 22; i++) {
+    for (let i = 1; i <= 50; i++) {
         const white_key = document.createElement('button');
         white_key.className = 'white_key';
         white_key.dataset.key_index = i;
         white_flag.appendChild(white_key);
     }
 
-    for (let i = 1; i <= 15; i++) {
+    for (let i = 1; i <= 35; i++) {
         const black_key = document.createElement('button');
         black_key.className = 'black_key';
         black_key.dataset.key_index = i;
@@ -101,26 +100,24 @@ async function UI_prepare() {
     const inst_select = document.getElementById('inst_select');
     const option_flag = document.createDocumentFragment();
     
-    inst_data.forEach((inst, i) => {
+    inst_data.forEach(async (inst, i) => {
         const option = Object.assign(document.createElement('option'), {
             value: inst.num,
-            textContent: inst.ja,
-            selected: i = 0 ? true : false
+            textContent: inst.ja
         });
 
         option_flag.appendChild(option);
-        Soundfont.instrument(audio_context, inst.js).then((inst) => {
-            instruments.push(inst);
-        });
+        // await Soundfont.instrument(audio_context, inst.js).then((inst) => { instruments[i] = inst });
     });
     
     console.log(instruments);
     inst_select.appendChild(option_flag);
     inst_id = inst_data[Number(inst_select.value) - 1].js
+    current_instrument = instruments[0];
 
     inst_select.addEventListener('change', () => {
         inst_id = inst_data[Number(inst_select.value) - 1].js;
-        current_instrument = instruments[Number(inst_select.value) - 1];
+        current_instrument = instruments[Number(inst_select.selectedIndex)];
     });
 }
 
@@ -182,7 +179,7 @@ async function key_click() {
         // console.log(key_index);
         if (!current_instrument) return;
 
-        instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
+        current_instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
             gain: 10,
             duration: 60 / tempo / 2
         });
@@ -196,7 +193,7 @@ async function key_click() {
         // console.log(key_index);
         if (!current_instrument) return;
 
-        instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
+        current_instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
             gain: 10,
             duration: 60 / tempo / 2
         });
@@ -209,7 +206,7 @@ async function key_click() {
         // console.log(key_index);
         if (!current_instrument) return;
         
-        instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
+        current_instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
             gain: 10,
             duration: 60 / tempo / 2
         });
@@ -223,7 +220,7 @@ async function key_click() {
         // console.log(key_index);
         if (!current_instrument) return;
 
-        instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
+        current_instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
             gain: 10,
             duration: 60 / tempo / 2
         });
