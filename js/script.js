@@ -7,19 +7,22 @@
 
     〇変数解説
         inst_id = 楽器指定（js名）
-        audio_context = 
-        offsets = 音階計算用配列（白鍵）
+        audio_context = ?
+        instruments = 読み込んだ楽器
+        current_instrument = 現在選択されている読み込まれた楽器
+        sinkaikai = 赤巻上青巻紙
 */
 
-let inst_id, instrument;
+let inst_id, instruments = [], current_instrument;
 let tempo = 100;
 const audio_context = new AudioContext();
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // ローディング表示処理
     keys_generation();
-    await inst_generation();
-    UI_prepare();
+    await UI_prepare();
     key_click();
+    // ローディング非表示処理
 });
 
 function keys_generation() {
@@ -77,15 +80,8 @@ function keys_generation() {
     drums_keyboards.appendChild(drums_flag);
 }
 
-async function inst_generation() {
-    
-}
-
 async function UI_prepare() {
     /*
-        〇関数解説
-            await inst_load() => inst.jsonから楽器を読み取る処理
-
         〇変数解説
             inst_data = 全楽器データ
             inst_select = 楽器選択<select>を格納する変数
@@ -113,23 +109,18 @@ async function UI_prepare() {
         });
 
         option_flag.appendChild(option);
+        Soundfont.instrument(audio_context, inst.js).then((inst) => {
+            instruments.push(inst);
+        });
     });
-
+    
+    console.log(instruments);
     inst_select.appendChild(option_flag);
     inst_id = inst_data[Number(inst_select.value) - 1].js
 
-    Soundfont.instrument(audio_context, inst_id).then((inst) => {
-        instrument = inst;
-        console.log(instrument);
-    });
-
     inst_select.addEventListener('change', () => {
         inst_id = inst_data[Number(inst_select.value) - 1].js;
-
-        Soundfont.instrument(audio_context, inst_id).then((inst) => {
-            instrument = inst;
-            console.log(instrument);
-        });
+        current_instrument = instruments[Number(inst_select.value) - 1];
     });
 }
 
@@ -189,11 +180,11 @@ async function key_click() {
         if (!key) return;
         const key_index = Number(key.dataset.key_index);
         // console.log(key_index);
-        if (!instrument) return;
+        if (!current_instrument) return;
 
         instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
             gain: 10,
-            duration: 60 / tempo / 4
+            duration: 60 / tempo / 2
         });
     });
 
@@ -203,11 +194,11 @@ async function key_click() {
         if (!key) return;
         const key_index = Number(key.dataset.key_index);
         // console.log(key_index);
-        if (!instrument) return;
+        if (!current_instrument) return;
 
         instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
             gain: 10,
-            duration: 60 / tempo / 4
+            duration: 60 / tempo / 2
         });
     }, true);
 
@@ -216,11 +207,11 @@ async function key_click() {
         if (!key) return;
         const key_index = Number(key.dataset.key_index);
         // console.log(key_index);
-        if (!instrument) return;
+        if (!current_instrument) return;
         
         instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
             gain: 10,
-            duration: 60 / tempo / 4
+            duration: 60 / tempo / 2
         });
     });
 
@@ -230,11 +221,11 @@ async function key_click() {
         if (!key) return;
         const key_index = Number(key.dataset.key_index);
         // console.log(key_index);
-        if (!instrument) return;
+        if (!current_instrument) return;
 
         instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
             gain: 10,
-            duration: 60 / tempo / 4
+            duration: 60 / tempo / 2
         });
     }, true);
 
