@@ -1,620 +1,362 @@
 [
     {
         "num": 1,
-        "en": "Accordion",
-        "ja": "アコーディオン",
-        "js": "accordion"
-    },
-    {
-        "num": 2,
         "en": "Acoustic Bass",
         "ja": "アコースティック・ベース",
         "js": "acoustic_bass"
     },
     {
-        "num": 3,
+        "num": 2,
         "en": "Acoustic Grand Piano",
         "ja": "アコースティック・グランドピアノ",
         "js": "acoustic_grand_piano"
     },
     {
-        "num": 4,
+        "num": 3,
         "en": "Acoustic Guitar (nylon)",
         "ja": "アコースティック・ギター（ナイロン弦）",
         "js": "acoustic_guitar_nylon"
     },
     {
-        "num": 5,
+        "num": 4,
         "en": "Acoustic Guitar (steel)",
         "ja": "アコースティック・ギター（スチール弦）",
         "js": "acoustic_guitar_steel"
     },
     {
-        "num": 6,
-        "en": "Agogo",
-        "ja": "アゴゴ",
-        "js": "agogo"
-    },
-    {
-        "num": 7,
-        "en": "Alto Sax",
-        "ja": "アルトサックス",
-        "js": "alto_sax"
-    },
-    {
-        "num": 8,
-        "en": "Bagpipe",
-        "ja": "バグパイプ",
-        "js": "bagpipe"
-    },
-    {
-        "num": 9,
-        "en": "Banjo",
-        "ja": "バンジョー",
-        "js": "banjo"
-    },
-    {
-        "num": 10,
-        "en": "Baritone Sax",
-        "ja": "バリトンサックス",
-        "js": "baritone_sax"
-    },
-    {
-        "num": 11,
+        "num": 5,
         "en": "Bassoon",
         "ja": "ファゴット",
         "js": "bassoon"
     },
     {
-        "num": 12,
-        "en": "Brass Section",
-        "ja": "ブラスセクション",
-        "js": "brass_section"
-    },
-    {
-        "num": 13,
-        "en": "Breath Noise",
-        "ja": "息音",
-        "js": "breath_noise"
-    },
-    {
-        "num": 14,
-        "en": "Bright Acoustic Piano",
-        "ja": "明るいアコースティックピアノ",
-        "js": "bright_acoustic_piano"
-    },
-    {
-        "num": 15,
-        "en": "Celesta",
-        "ja": "チェレスタ",
-        "js": "celesta"
-    },
-    {
-        "num": 16,
+        "num": 6,
         "en": "Choir Aahs",
         "ja": "合唱の「アー」",
         "js": "choir_aahs"
     },
     {
-        "num": 17,
+        "num": 7,
         "en": "Church Organ",
         "ja": "教会オルガン",
         "js": "church_organ"
     },
     {
-        "num": 18,
+        "num": 8,
         "en": "Clarinet",
         "ja": "クラリネット",
         "js": "clarinet"
     },
     {
-        "num": 19,
-        "en": "Clavinet",
-        "ja": "クラビネット",
-        "js": "clavinet"
-    },
-    {
-        "num": 20,
+        "num": 9,
         "en": "Contrabass",
         "ja": "コントラバス",
         "js": "contrabass"
     },
     {
-        "num": 21,
-        "en": "Distortion Guitar",
-        "ja": "ディストーションギター",
-        "js": "distortion_guitar"
-    },
-    {
-        "num": 22,
+        "num": 10,
         "en": "Drawbar Organ",
         "ja": "ドローバーオルガン",
         "js": "drawbar_organ"
     },
     {
-        "num": 23,
-        "en": "Dulcimer",
-        "ja": "ダルシマー",
-        "js": "dulcimer"
-    },
-    {
-        "num": 24,
+        "num": 11,
         "en": "Electric Bass (finger)",
         "ja": "エレキベース（フィンガー）",
         "js": "electric_bass_finger"
     },
     {
-        "num": 25,
+        "num": 12,
         "en": "Electric Bass (pick)",
         "ja": "エレキベース（ピック）",
         "js": "electric_bass_pick"
     },
     {
-        "num": 26,
+        "num": 13,
         "en": "Electric Grand Piano",
         "ja": "エレクトリックグランドピアノ",
         "js": "electric_grand_piano"
     },
     {
-        "num": 27,
+        "num": 14,
         "en": "Electric Guitar (clean)",
         "ja": "エレキギター（クリーン）",
         "js": "electric_guitar_clean"
     },
     {
-        "num": 28,
+        "num": 15,
         "en": "Electric Guitar (jazz)",
         "ja": "エレキギター（ジャズ）",
         "js": "electric_guitar_jazz"
     },
     {
-        "num": 29,
+        "num": 16,
         "en": "Electric Guitar (muted)",
         "ja": "エレキギター（ミュート）",
         "js": "electric_guitar_muted"
     },
     {
-        "num": 30,
+        "num": 17,
         "en": "Electric Piano 1",
         "ja": "エレクトリックピアノ1",
         "js": "electric_piano_1"
     },
     {
-        "num": 31,
+        "num": 18,
         "en": "Electric Piano 2",
         "ja": "エレクトリックピアノ2",
         "js": "electric_piano_2"
     },
     {
-        "num": 32,
+        "num": 19,
         "en": "English Horn",
         "ja": "イングリッシュホルン",
         "js": "english_horn"
     },
     {
-        "num": 33,
-        "en": "Fiddle",
-        "ja": "フィドル",
-        "js": "fiddle"
-    },
-    {
-        "num": 34,
+        "num": 20,
         "en": "Flute",
         "ja": "フルート",
         "js": "flute"
     },
     {
-        "num": 35,
+        "num": 21,
         "en": "French Horn",
         "ja": "フレンチホルン",
         "js": "french_horn"
     },
     {
-        "num": 36,
-        "en": "Fretless Bass",
-        "ja": "フレットレスベース",
-        "js": "fretless_bass"
-    },
-    {
-        "num": 37,
+        "num": 22,
         "en": "Glockenspiel",
-        "ja": "グロッケンシュピール",
+        "ja": "鉄琴",
         "js": "glockenspiel"
     },
     {
-        "num": 38,
-        "en": "Harmonica",
-        "ja": "ハーモニカ",
-        "js": "harmonica"
-    },
-    {
-        "num": 39,
-        "en": "Harpsichord",
-        "ja": "チェンバロ",
-        "js": "harpsichord"
-    },
-    {
-        "num": 40,
-        "en": "Honky-tonk Piano",
-        "ja": "ホンキートンクピアノ",
-        "js": "honkytonk_piano"
-    },
-    {
-        "num": 41,
-        "en": "Kalimba",
-        "ja": "カリンバ",
-        "js": "kalimba"
-    },
-    {
-        "num": 42,
-        "en": "Koto",
-        "ja": "琴",
-        "js": "koto"
-    },
-    {
-        "num": 43,
+        "num": 23,
         "en": "Lead 1 (square)",
         "ja": "リード1（スクエア）",
         "js": "lead_1_square"
     },
     {
-        "num": 44,
+        "num": 24,
         "en": "Lead 2 (sawtooth)",
         "ja": "リード2（ノコギリ波）",
         "js": "lead_2_sawtooth"
     },
     {
-        "num": 45,
+        "num": 25,
         "en": "Lead 3 (calliope)",
         "ja": "リード3（カリオペ）",
         "js": "lead_3_calliope"
     },
     {
-        "num": 46,
+        "num": 26,
         "en": "Lead 4 (chiff)",
         "ja": "リード4（シフ）",
         "js": "lead_4_chiff"
     },
     {
-        "num": 47,
+        "num": 27,
         "en": "Lead 5 (charang)",
         "ja": "リード5（チャラン）",
         "js": "lead_5_charang"
     },
     {
-        "num": 48,
+        "num": 28,
         "en": "Lead 6 (voice)",
         "ja": "リード6（ボイス）",
         "js": "lead_6_voice"
     },
     {
-        "num": 49,
+        "num": 29,
         "en": "Lead 7 (fifths)",
         "ja": "リード7（5度音程）",
         "js": "lead_7_fifths"
     },
     {
-        "num": 50,
-        "en": "Marimba",
-        "ja": "マリンバ",
-        "js": "marimba"
-    },
-    {
-        "num": 51,
-        "en": "Music Box",
-        "ja": "オルゴール",
-        "js": "music_box"
-    },
-    {
-        "num": 52,
-        "en": "Muted Trumpet",
-        "ja": "ミュート・トランペット",
-        "js": "muted_trumpet"
-    },
-    {
-        "num": 53,
+        "num": 30,
         "en": "Oboe",
         "ja": "オーボエ",
         "js": "oboe"
     },
     {
-        "num": 54,
-        "en": "Ocarina",
-        "ja": "オカリナ",
-        "js": "ocarina"
-    },
-    {
-        "num": 55,
+        "num": 31,
         "en": "Orchestra Hit",
         "ja": "オーケストラ・ヒット",
         "js": "orchestra_hit"
     },
     {
-        "num": 56,
+        "num": 32,
         "en": "Orchestral Harp",
         "ja": "オーケストラ・ハープ",
         "js": "orchestral_harp"
     },
     {
-        "num": 57,
-        "en": "Overdriven Guitar",
-        "ja": "オーバードライブ・ギター",
-        "js": "overdriven_guitar"
-    },
-    {
-        "num": 58,
+        "num": 33,
         "en": "Pad 1 (new age)",
         "ja": "パッド1（ニューエイジ）",
         "js": "pad_1_new_age"
     },
     {
-        "num": 59,
+        "num": 34,
         "en": "Pad 2 (warm)",
         "ja": "パッド2（ウォーム）",
         "js": "pad_2_warm"
     },
     {
-        "num": 60,
+        "num": 35,
         "en": "Pad 3 (polysynth)",
         "ja": "パッド3（ポリシンセ）",
         "js": "pad_3_polysynth"
     },
     {
-        "num": 61,
+        "num": 36,
         "en": "Pad 4 (choir)",
         "ja": "パッド4（合唱）",
         "js": "pad_4_choir"
     },
     {
-        "num": 62,
+        "num": 37,
         "en": "Pad 5 (bowed)",
         "ja": "パッド5（弓奏）",
         "js": "pad_5_bowed"
     },
     {
-        "num": 63,
+        "num": 38,
         "en": "Pad 6 (metallic)",
         "ja": "パッド6（金属音）",
         "js": "pad_6_metallic"
     },
     {
-        "num": 64,
+        "num": 39,
         "en": "Pad 7 (halo)",
         "ja": "パッド7（ハロー）",
         "js": "pad_7_halo"
     },
     {
-        "num": 65,
+        "num": 40,
         "en": "Pad 8 (sweep)",
         "ja": "パッド8（スイープ）",
         "js": "pad_8_sweep"
     },
     {
-        "num": 66,
-        "en": "Pan Flute",
-        "ja": "パンフルート",
-        "js": "pan_flute"
-    },
-    {
-        "num": 67,
+        "num": 41,
         "en": "Percussive Organ",
         "ja": "パーカッシブオルガン",
         "js": "percussive_organ"
     },
     {
-        "num": 68,
+        "num": 42,
         "en": "Piccolo",
         "ja": "ピッコロ",
         "js": "piccolo"
     },
     {
-        "num": 69,
-        "en": "Pizzicato Strings",
-        "ja": "ピチカート弦楽",
-        "js": "pizzicato_strings"
-    },
-    {
-        "num": 70,
-        "en": "Recorder",
-        "ja": "リコーダー",
-        "js": "recorder"
-    },
-    {
-        "num": 71,
+        "num": 43,
         "en": "Reed Organ",
         "ja": "リードオルガン",
         "js": "reed_organ"
     },
     {
-        "num": 72,
+        "num": 44,
         "en": "Rock Organ",
         "ja": "ロックオルガン",
         "js": "rock_organ"
     },
     {
-        "num": 73,
-        "en": "Shakuhachi",
-        "ja": "尺八",
-        "js": "shakuhachi"
-    },
-    {
-        "num": 74,
-        "en": "Shamisen",
-        "ja": "三味線",
-        "js": "shamisen"
-    },
-    {
-        "num": 75,
-        "en": "Shanai",
-        "ja": "シャナイ",
-        "js": "shanai"
-    },
-    {
-        "num": 76,
-        "en": "Sitar",
-        "ja": "シタール",
-        "js": "sitar"
-    },
-    {
-        "num": 77,
+        "num": 45,
         "en": "Slap Bass 1",
         "ja": "スラップベース1",
         "js": "slap_bass_1"
     },
     {
-        "num": 78,
+        "num": 46,
         "en": "Slap Bass 2",
         "ja": "スラップベース2",
         "js": "slap_bass_2"
     },
     {
-        "num": 79,
-        "en": "Soprano Sax",
-        "ja": "ソプラノサックス",
-        "js": "soprano_sax"
-    },
-    {
-        "num": 80,
-        "en": "Steel Drums",
-        "ja": "スティールドラム",
-        "js": "steel_drums"
-    },
-    {
-        "num": 81,
-        "en": "String Ensemble 1",
-        "ja": "弦楽アンサンブル1",
-        "js": "string_ensemble_1"
-    },
-    {
-        "num": 82,
-        "en": "String Ensemble 2",
-        "ja": "弦楽アンサンブル2",
-        "js": "string_ensemble_2"
-    },
-    {
-        "num": 83,
+        "num": 47,
         "en": "Synth Bass 1",
         "ja": "シンセベース1",
         "js": "synth_bass_1"
     },
     {
-        "num": 84,
+        "num": 48,
         "en": "Synth Bass 2",
         "ja": "シンセベース2",
         "js": "synth_bass_2"
     },
     {
-        "num": 85,
+        "num": 49,
         "en": "Synth Brass 1",
         "ja": "シンセブラス1",
         "js": "synth_brass_1"
     },
     {
-        "num": 86,
+        "num": 50,
         "en": "Synth Brass 2",
         "ja": "シンセブラス2",
         "js": "synth_brass_2"
     },
     {
-        "num": 87,
+        "num": 51,
         "en": "Synth Choir",
         "ja": "シンセコーラス",
         "js": "synth_choir"
     },
     {
-        "num": 88,
+        "num": 52,
         "en": "Synth Strings 1",
         "ja": "シンセストリングス1",
         "js": "synth_strings_1"
     },
     {
-        "num": 89,
+        "num": 53,
         "en": "Synth Strings 2",
         "ja": "シンセストリングス2",
         "js": "synth_strings_2"
     },
     {
-        "num": 90,
-        "en": "Tango Accordion",
-        "ja": "タンゴアコーディオン",
-        "js": "tango_accordion"
-    },
-    {
-        "num": 91,
-        "en": "Tenor Sax",
-        "ja": "テナーサックス",
-        "js": "tenor_sax"
-    },
-    {
-        "num": 92,
-        "en": "Tinkle Bell",
-        "ja": "チリンベル",
-        "js": "tinkle_bell"
-    },
-    {
-        "num": 93,
-        "en": "Tremolo Strings",
-        "ja": "トレモロストリングス",
-        "js": "tremolo_strings"
-    },
-    {
-        "num": 94,
+        "num": 54,
         "en": "Trombone",
         "ja": "トロンボーン",
         "js": "trombone"
     },
     {
-        "num": 95,
+        "num": 55,
         "en": "Trumpet",
         "ja": "トランペット",
         "js": "trumpet"
     },
     {
-        "num": 96,
+        "num": 56,
         "en": "Tuba",
         "ja": "チューバ",
         "js": "tuba"
     },
     {
-        "num": 97,
-        "en": "Tubular Bells",
-        "ja": "チューブラーベル",
-        "js": "tubular_bells"
-    },
-    {
-        "num": 98,
-        "en": "Vibraphone",
-        "ja": "ビブラフォン",
-        "js": "vibraphone"
-    },
-    {
-        "num": 99,
+        "num": 57,
         "en": "Viola",
         "ja": "ヴィオラ",
         "js": "viola"
     },
     {
-        "num": 100,
+        "num": 58,
         "en": "Violin",
         "ja": "ヴァイオリン",
         "js": "violin"
     },
     {
-        "num": 101,
+        "num": 59,
         "en": "Voice Oohs",
         "ja": "コーラス（ウー）",
         "js": "voice_oohs"
     },
     {
-        "num": 102,
-        "en": "Whistle",
-        "ja": "ホイッスル",
-        "js": "whistle"
-    },
-    {
-        "num": 103,
+        "num": 60,
         "en": "Xylophone",
-        "ja": "シロフォン",
+        "ja": "木琴",
         "js": "xylophone"
     }
 ]

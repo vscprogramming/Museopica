@@ -18,9 +18,9 @@ const audio_context = new AudioContext();
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('loading').style.display = 'flex';
-    keys_generation();
+    await keys_generation();
     await UI_prepare();
-    key_click();
+    await key_click();
     document.getElementById('loading').style.display = 'none';
 });
 
@@ -100,20 +100,20 @@ async function UI_prepare() {
     const inst_select = document.getElementById('inst_select');
     const option_flag = document.createDocumentFragment();
     
-    inst_data.forEach(async (inst, i) => {
+    await inst_data.forEach(async (inst, i) => {
         const option = Object.assign(document.createElement('option'), {
             value: inst.num,
             textContent: inst.ja
         });
 
         option_flag.appendChild(option);
-        // await Soundfont.instrument(audio_context, inst.js).then((inst) => { instruments[i] = inst });
+        await Soundfont.instrument(audio_context, inst.js).then((inst) => { instruments[i] = inst });
+        current_instrument = instruments[0];
     });
     
     console.log(instruments);
     inst_select.appendChild(option_flag);
     inst_id = inst_data[Number(inst_select.value) - 1].js
-    current_instrument = instruments[0];
 
     inst_select.addEventListener('change', () => {
         inst_id = inst_data[Number(inst_select.value) - 1].js;
@@ -136,7 +136,6 @@ async function inst_load() {
                 alert(`楽器の読み込みにエラーが発生しました。\n再試行します。\n（${retry_count} / 3）`);
                 retry_count++;
             }
-
         } catch (error) {
             console.error(`${retry_count} / 3, inst net error`);
             alert(`ネットワークエラーが発生しました。\n再試行します。\n（${retry_count} / 3）`);
@@ -180,7 +179,7 @@ async function key_click() {
         if (!current_instrument) return;
 
         current_instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
-            gain: 10,
+            gain: 7,
             duration: 60 / tempo / 2
         });
     });
@@ -194,7 +193,7 @@ async function key_click() {
         if (!current_instrument) return;
 
         current_instrument.play(pitch_data.white[key_index - 1], audio_context.currentTime, {
-            gain: 10,
+            gain: 7,
             duration: 60 / tempo / 2
         });
     }, true);
@@ -207,7 +206,7 @@ async function key_click() {
         if (!current_instrument) return;
         
         current_instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
-            gain: 10,
+            gain: 7,
             duration: 60 / tempo / 2
         });
     });
@@ -221,7 +220,7 @@ async function key_click() {
         if (!current_instrument) return;
 
         current_instrument.play(pitch_data.black[key_index - 1], audio_context.currentTime, {
-            gain: 10,
+            gain: 7,
             duration: 60 / tempo / 2
         });
     }, true);
@@ -259,7 +258,6 @@ async function pitch_load() {
                 alert(`音階の読み込みにエラーが発生しました。\n再試行します。\n（${retry_count} / 3）`);
                 retry_count++;
             }
-
         } catch (error) {
             console.error(`${retry_count} / 3, pitch net error`);
             alert(`ネットワークエラーが発生しました。\n再試行します。\n（${retry_count} / 3）`);

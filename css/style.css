@@ -63,6 +63,10 @@ body {
     background-color: #eee;
 }
 
+#bottom_ui p {
+    color: #eee;
+}
+
 #editor {
     top: 0;
     left: 0;
@@ -91,11 +95,11 @@ body {
 
 #keyboards::-webkit-scrollbar-thumb {
     border-radius: 180px;
-    background-color: #00f7;
+    background-color: #f707;
 }
 
 #keyboards::-webkit-scrollbar-thumb:hover {
-    background-color: #00f;
+    background-color: #f70;
 }
 
 #white_keyboards {
@@ -106,7 +110,8 @@ body {
     flex-direction: column;
 }
 
-.white_key, .drum_key {
+.white_key,
+.drum_key {
     width: 100%;
     height: var(--key-wh);
     border: none;
@@ -123,7 +128,6 @@ body {
 }
 
 /* 未確定箇所　ここまで */
-
 
 #black_keyboards {
     width: 62%;
@@ -150,17 +154,18 @@ body {
 }
 
 .black_key {
-    width: 100%; height: var(--key-bh);
+    width: 100%;
+    height: var(--key-bh);
     background-color: #000;
 }
 
 #drums_keyboards {
-    top: calc(var(--key-wh) * 50);
-    width: 100%;
     z-index: 1;
+    width: 100%;
     display: flex;
     position: absolute;
     flex-direction: column;
+    top: calc(var(--key-wh) * 50);
 }
 
 /* 未確定箇所　ここから */
@@ -175,18 +180,26 @@ body {
 /* 未確定箇所　ここまで */
 
 #grid {
-    width: 89.5%; height: 100%;
+    width: 89.5%;
+    height: 100%;
     background-color: #333;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 #loading {
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     z-index: 9999;
     display: flex;
     position: fixed;
@@ -196,9 +209,10 @@ body {
 }
 
 #spinner {
-    width: 70px; height: 70px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     border: 7px solid #eee;
-    border-top: 7px solid #00f;
+    border-top: 7px solid #f70;
 }
