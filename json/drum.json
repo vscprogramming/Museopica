@@ -2,66 +2,66 @@
     {
         "num": 1,
         "ja": "バスドラム",
-        "path": "../audio/bass.m4a"
+        "path": "audio/bass.m4a"
     },
     {
         "num": 2,
         "ja": "スネアドラム1",
-        "path": "../audio/snare1.m4a"
+        "path": "audio/snare1.m4a"
     },
     {
         "num": 3,
         "ja": "スネアドラム2",
-        "path": "../audio/snare2.m4a"
+        "path": "audio/snare2.m4a"
     },
     {
         "num": 4,
         "ja": "スネアドラム3",
-        "path": "../audio/snare3.m4a"
+        "path": "audio/snare3.m4a"
     },
     {
         "num": 5,
         "ja": "フロアタム",
-        "path": "../audio/floor.m4a"
+        "path": "audio/floor.m4a"
     },
     {
         "num": 6,
         "ja": "ロータム",
-        "path": "../audio/rock.m4a"
+        "path": "audio/rock.m4a"
     },
     {
         "num": 7,
         "ja": "ハイタム",
-        "path": "../audio/high.m4a"
+        "path": "audio/high.m4a"
     },
     {
         "num": 8,
         "ja": "クローズハイハット",
-        "path": "../audio/closed.m4a"
+        "path": "audio/closed.m4a"
     },
     {
         "num": 9,
         "ja": "オープンハイハット",
-        "path": "../audio/open.m4a"
+        "path": "audio/open.m4a"
     },
     {
         "num": 10,
         "ja": "ペダルハイハット",
-        "path": "../audio/pedal.m4a"
+        "path": "audio/pedal.m4a"
     },
     {
         "num": 11,
         "ja": "クラッシュシンバル",
-        "path": "../audio/crash.m4a"
+        "path": "audio/crash.m4a"
     },
     {
         "num": 12,
         "ja": "ライドシンバル1",
-        "path": "../audio/ride1.m4a"
+        "path": "audio/ride1.m4a"
     },
     {
         "num": 13,
         "ja": "ライドシンバル2",
-        "path": "../audio/ride2.m4a"
+        "path": "audio/ride2.m4a"
     }
 ]
