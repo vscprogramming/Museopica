@@ -34,7 +34,7 @@ html, body {
     width: 7%; height: 100%;
     border: none;
     color: #eee;
-    font-size: 134%;
+    font-size: 1vw;
     background-color: #000;
     transition: background-color .2s;
 }

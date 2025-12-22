@@ -75,7 +75,7 @@ function keys_generation() {
         black_flag.appendChild(black_key);
     }
 
-    for (let i = 1; i <= 13; i++) {
+    for (let i = 1; i <= 9; i++) {
         const drum_key = document.createElement('button');
         drum_key.className = 'drum_key';
         drum_key.dataset.key_index = i;
@@ -243,7 +243,7 @@ function paint_editer_grid() {
 
     const canvas_grid = document.getElementById('grid');
     resize_stage(canvas_grid);
-    window.addEventListener('resize', resize_stage(canvas_grid));
+    window.addEventListener('resize', () => { resize_stage(canvas_grid) });
     
     const grid_width = canvas.getBoundingClientRect().width / 64;
     const grid_height = canvas.getBoundingClientRect().height / 27;
