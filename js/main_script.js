@@ -157,7 +157,7 @@ async function inst_load() {
 
     while (retry_count <= 3) {
         try {
-            const res = await fetch('../res/json/inst.json');
+            const res = await fetch('../folder/json/inst.json');
 
             if (res.ok) {
                 const json_data = await res.json();
@@ -183,7 +183,7 @@ async function drum_load() {
 
     while (retry_count <= 3) {
         try {
-            const res = await fetch('../res/json/drum.json');
+            const res = await fetch('../folder/json/drum.json');
 
             if (res.ok) {
                 const json_data = await res.json();
@@ -406,7 +406,7 @@ async function pitch_load() {
 
     while (retry_count <= 3) {
         try {
-            const res = await fetch('../res/json/pitch.json');
+            const res = await fetch('../folder/json/pitch.json');
 
             if (res.ok) {
                 const json_data = await res.json();
