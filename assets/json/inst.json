@@ -1,0 +1,147 @@
+[
+    {
+        "num": 1,
+        "ja": "アコースティック・グランドピアノ",
+        "js": "acoustic_grand_piano"
+    },
+    {
+        "num": 2,
+        "ja": "エレクトリック・グランドピアノ",
+        "js": "electric_grand_piano"
+    },
+    {
+        "num": 3,
+        "ja": "鉄琴",
+        "js": "vibraphone"
+    },
+    {
+        "num": 4,
+        "ja": "木琴",
+        "js": "marimba"
+    },
+    {
+        "num": 5,
+        "ja": "教会オルガン",
+        "js": "church_organ"
+    },
+    {
+        "num": 6,
+        "ja": "ドローバーオルガン",
+        "js": "drawbar_organ"
+    },
+    {
+        "num": 7,
+        "ja": "アコースティック・ギター（スチール弦）",
+        "js": "acoustic_guitar_steel"
+    },
+    {
+        "num": 8,
+        "ja": "エレキギター（クリーン）",
+        "js": "electric_guitar_clean"
+    },
+    {
+        "num": 9,
+        "ja": "エレキベース（ピック）",
+        "js": "electric_bass_pick"
+    },
+    {
+        "num": 10,
+        "ja": "スラップベース",
+        "js": "slap_bass_2"
+    },
+    {
+        "num": 11,
+        "ja": "シンセベース",
+        "js": "synth_bass_1"
+    },
+    {
+        "num": 12,
+        "ja": "ヴァイオリン",
+        "js": "violin"
+    },
+    {
+        "num": 13,
+        "ja": "シンセストリングス",
+        "js": "synth_strings_2"
+    },
+    {
+        "num": 14,
+        "ja": "オーケストラ・ハープ",
+        "js": "orchestral_harp"
+    },
+    {
+        "num": 15,
+        "ja": "コーラス（アー）",
+        "js": "choir_aahs"
+    },
+    {
+        "num": 16,
+        "ja": "コーラス（ウー）",
+        "js": "voice_oohs"
+    },
+    {
+        "num": 17,
+        "ja": "シンセコーラス",
+        "js": "synth_choir"
+    },
+    {
+        "num": 18,
+        "ja": "トランペット",
+        "js": "trumpet"
+    },
+    {
+        "num": 19,
+        "ja": "チューバ",
+        "js": "tuba"
+    },
+    {
+        "num": 20,
+        "ja": "シンセブラス",
+        "js": "synth_brass_1"
+    },
+    {
+        "num": 21,
+        "ja": "クラリネット",
+        "js": "clarinet"
+    },
+    {
+        "num": 22,
+        "ja": "フルート",
+        "js": "flute"
+    },
+    {
+        "num": 23,
+        "ja": "リード1（スクエア）",
+        "js": "lead_1_square"
+    },
+    {
+        "num": 24,
+        "ja": "リード2（ノコギリ波）",
+        "js": "lead_2_sawtooth"
+    },
+    {
+        "num": 25,
+        "ja": "リード3（ボイス）",
+        "js": "lead_6_voice"
+    },
+    {
+        "num": 26,
+        "ja": "パッド1（ニューエイジ）",
+        "js": "pad_1_new_age"
+    },
+    {
+        "num": 27,
+        "ja": "パッド2（ポリシンセ）",
+        "js": "pad_3_polysynth"
+    },
+    {
+        "num": 28,
+        "ja": "パッド3（ハロー）",
+        "js": "pad_7_halo"
+    },
+    {
+        "num": 29,
+        "ja": "オーケストラ・ヒット",
+        "js": "orchestra_hit"
+    }
+]

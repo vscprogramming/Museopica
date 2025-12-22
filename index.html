@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="css/style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="With You Once More ♪">
+        <link rel="icon" href="folder/img/icon.png">
         <script src="https://unpkg.com/soundfont-player/dist/soundfont-player.js"></script>
         <title>Museopica</title>
     </head>
@@ -23,11 +23,19 @@
             </div>
             <div id="editor">
                 <div id="keyboards">
-                    <div id="white_keyboards"></div>
-                    <div id="black_keyboards"></div>
-                    <div id="drums_keyboards"></div>
+                    <div id="white_keyboards">
+                        <!-- 白鍵はjsで作成 -->
+                    </div>
+                    <div id="black_keyboards">
+                        <!-- 黒鍵はjsで作成 -->
+                    </div>
+                    <div id="drums_keyboards">
+                        <!-- ドラム鍵盤はjsで作成 -->
+                    </div>
                 </div>
-                <canvas id="grid"></canvas>
+                <div id="canvas">
+                    <canvas id="grid"></canvas>
+                </div>
             </div>
             <div id="bottom_ui">
                 <p>v0.11</p>
@@ -37,6 +45,6 @@
         <div id="loading" class="loading">
             <div id="spinner" class="spinner"></div>
         </div>
-        <script src="js/script.js"></script>
+        <script type="module" src="js/main_script.js"></script>
     </body>
 </html>
