@@ -10,7 +10,6 @@
 }
 
 html, body {
-    /* width: 100vw; height: 100vh; */
     -webkit-user-select: none;
     margin: 0;
     user-select: none;
@@ -38,7 +37,7 @@ html, body {
     color: #eee;
     font-size: 1vw;
     background-color: #000;
-    transition: background-color .2s;
+    transition: background-color .2s ease;
 }
 
 .ui_btn:hover {
@@ -166,9 +165,23 @@ html, body {
     background-color: #333;
 }
 
+.canvas {
+    position: absolute;
+}
+
 #grid {
-    width: 100%;
+    z-index: 1;
+    pointer-events: none;
     background-color: #333;
+}
+
+#put_notes {
+    z-index: 2;
+}
+
+#move_notes {
+    z-index: 3;
+    background-color: #0000;
 }
 
 @keyframes spin {

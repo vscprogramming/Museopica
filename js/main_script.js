@@ -10,13 +10,12 @@
         inst_id = 楽器指定（js名）
         audio_context_inst = soundfont-player用（メロディー楽器用）
         audio_context_drum = webaudiofont用（ドラム用）
-        drum_player = ドラム再生用（webaudiofont）
         instruments = 読み込んだ楽器を格納する配列
         drums = 読み込んだ打楽器を格納する配列（buffer）
         current_instrument = 現在選択されている楽器
 */
 
-let inst_id, instruments = [], current_instrument, drums = [];
+let inst_id, instruments = [], drums = [], current_instrument;
 let tempo = 100;
 const audio_context_inst = new AudioContext();
 const audio_context_drum = new AudioContext();
@@ -26,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await keys_generation();
     await UI_prepare();
     await scroll_syncing();
-    await paint_editer_grid();
+    await editer_grid_prepare();
     await key_click();
     document.getElementById('loading').style.display = 'none';
 });
@@ -232,36 +231,103 @@ function scroll_syncing() {
     });
 }
 
-function paint_editer_grid() {
+async function editer_grid_prepare() {
     /*
         〇関数解説
             resize_stage() => canvasのサイズ変更処理
+            paint_stage() => canvasの描画
 
         〇変数解説
-            canvas = 描画するcanvas本体
+            canvas_grid = グリッドを描画するcanvas本体
+            canvas_move_notes = 設置する前の動くノーツを描画するcanvas本体
+            canvas_put_notes = 設置されたノーツを描画するcanvas本体
     */
 
     const canvas_grid = document.getElementById('grid');
-    resize_stage(canvas_grid);
-    window.addEventListener('resize', () => { resize_stage(canvas_grid) });
-    
-    const grid_width = canvas.getBoundingClientRect().width / 64;
-    const grid_height = canvas.getBoundingClientRect().height / 27;
+    const canvas_put_notes = document.getElementById('put_notes');
+    const canvas_move_notes = document.getElementById('move_notes');
+    await resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes);
+    await paint_stage(canvas_grid);
 
-    // 横線描画
+    window.addEventListener('resize', async () => {
+        await resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes);
+        await paint_stage(canvas_grid);
+    });
 }
 
-function resize_stage(canvas_grid) {
+function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes) {
     /*
         〇変数解説
             canvas_grid = 描画するcanvas#grid
-            canvas_size = div#gridのサイズ
+            white_keyboards = div#white_keyboardsのCSS計算後のstyle
+            drums_keyboards = div#drums_keyboardsのCSS計算後のstyle
     */
 
+    const div_canvas = document.getElementById('canvas').getBoundingClientRect();
     const white_keyboards = document.getElementById('white_keyboards').getBoundingClientRect();
     const drums_keyboards = document.getElementById('drums_keyboards').getBoundingClientRect();
     // console.log(white_keyboards.height + drums_keyboards.height);
-    canvas_grid.style.height = `${white_keyboards.height + drums_keyboards.height}px`;
+
+    [canvas_grid, canvas_put_notes, canvas_move_notes].forEach(canvas => {
+        Object.assign(canvas, {
+            width: div_canvas.width - 7,
+            height: white_keyboards.height + drums_keyboards.height
+        });
+    });
+}
+
+function paint_stage(canvas_grid) {
+    /*
+        〇変数解説
+            grid_width = 描画するグリッド1つ分の横幅
+            grid_height = 描画するグリッド1つ分の縦幅
+            ctx = 2dコンテキストを取得
+    */
+    const grid_width = canvas_grid.getBoundingClientRect().width / 64;
+    const grid_height = canvas_grid.getBoundingClientRect().height / 59;
+    // console.log(grid_width, grid_height)
+    const ctx = canvas_grid.getContext('2d');
+    ctx.clearRect(0, 0, canvas_grid.width, canvas_grid.height);
+
+    for (let x = 1; x <= 64; x++) {
+        ctx.beginPath();
+        // console.log(x * grid_width);
+
+        if (x % 16 == 0) {
+            ctx.strokeStyle = '#0000ff';
+            ctx.lineWidth = 2;
+        } else if (x % 4 == 0) {
+            ctx.strokeStyle = '#828282';
+            ctx.lineWidth = 1;
+        } else {
+            ctx.strokeStyle = '#828282';
+            ctx.lineWidth = 0.5;
+        }
+
+        ctx.moveTo(x * grid_width, 0);
+        ctx.lineTo(x * grid_width, canvas_grid.height);
+        ctx.stroke();
+    }
+
+    for (let y = 1; y <= 58; y++) {
+        ctx.beginPath();
+        // console.log(y * grid_height);
+
+        if (y < 50 && (y % 7 == 1 || y % 7 == 5)) {
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 1;
+        } else if (y == 50) {
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 1;
+        } else {
+            ctx.strokeStyle = '#828282';
+            ctx.lineWidth = 0.5;
+        }
+
+        ctx.moveTo(0, y * grid_height);
+        ctx.lineTo(canvas_grid.width, y * grid_height);
+        ctx.stroke();
+    }
 }
 
 async function key_click() {
