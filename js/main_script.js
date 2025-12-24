@@ -116,7 +116,7 @@ async function UI_prepare() {
     const inst_select = document.getElementById('inst_select');
     const option_flag = document.createDocumentFragment();
     
-    inst_data.forEach((inst) => {
+    inst_data.forEach(inst => {
         const option = Object.assign(document.createElement('option'), {
             value: inst.num,
             textContent: inst.ja
@@ -139,10 +139,13 @@ async function UI_prepare() {
 
     // 打楽器読み込み
     await Promise.all(drum_data.map(async (drum, i) => {
-        const res = await fetch(drum.path);
+        const res = await fetch(drum.audio_path);
         const binary = await res.arrayBuffer();
         drums[i] = await audio_context_drum.decodeAudioData(binary);
-    }))
+    }));
+
+    const drum_keys = document.querySelectorAll('#drums_keyboards .drum_key');
+    drum_data.forEach((drum, i) => drum_keys[i].textContent = drum.en);
 
     // プルダウン変更時処理
     inst_select.addEventListener('change', () => {
@@ -352,13 +355,13 @@ async function key_click() {
 
     const pitch_data = await pitch_load();
     let click = false;
-    document.addEventListener('pointerdown', () => { click = true });
-    document.addEventListener('pointerup', () => { click = false });
+    document.addEventListener('pointerdown', () => click = true);
+    document.addEventListener('pointerup', () => click = false);
     const white_keyboards = document.getElementById('white_keyboards');
     const black_keyboards = document.getElementById('black_keyboards');
     const drums_keyboards = document.getElementById('drums_keyboards');
 
-    white_keyboards.addEventListener('pointerdown', (event) => {
+    white_keyboards.addEventListener('pointerdown', event => {
         const key = event.target.closest('.white_key');
         if (!key) return;
         key.style.backgroundColor = '#aaa';
@@ -372,7 +375,7 @@ async function key_click() {
         });
     });
 
-    white_keyboards.addEventListener('pointerenter', (event) => {
+    white_keyboards.addEventListener('pointerenter', event => {
         if (!click) return;
         const key = event.target.closest('.white_key');
         if (!key) return;
@@ -387,15 +390,15 @@ async function key_click() {
         });
     }, true);
 
-    ['pointerup', 'pointerout'].forEach((event) => {
-        white_keyboards.addEventListener(event, (event) => {
+    ['pointerup', 'pointerout'].forEach(event => {
+        white_keyboards.addEventListener(event, event => {
             const key = event.target.closest('.white_key');
             if (!key) return;
             key.style.backgroundColor = '';
         });
     });
 
-    black_keyboards.addEventListener('pointerdown', (event) => {
+    black_keyboards.addEventListener('pointerdown', event => {
         const key = event.target.closest('.black_key');
         if (!key) return;
         key.style.backgroundColor = '#555';
@@ -409,7 +412,7 @@ async function key_click() {
         });
     });
 
-    black_keyboards.addEventListener('pointerenter', (event) => {
+    black_keyboards.addEventListener('pointerenter', event => {
         if (!click) return;
         const key = event.target.closest('.black_key');
         if (!key) return;
@@ -424,15 +427,15 @@ async function key_click() {
         });
     }, true);
 
-    ['pointerup', 'pointerout'].forEach((event) => {
-        black_keyboards.addEventListener(event, (event) => {
+    ['pointerup', 'pointerout'].forEach(event => {
+        black_keyboards.addEventListener(event, event => {
             const key = event.target.closest('.black_key');
             if (!key) return;
             key.style.backgroundColor = '';
         });
     });
 
-    drums_keyboards.addEventListener('pointerdown', (event) => {
+    drums_keyboards.addEventListener('pointerdown', event => {
         const key = event.target.closest('.drum_key');
         if (!key) return;
         key.style.backgroundColor = '#aaa';
@@ -441,7 +444,7 @@ async function key_click() {
         play_drum(drums[key_index - 1]);
     });
 
-    drums_keyboards.addEventListener('pointerenter', (event) => {
+    drums_keyboards.addEventListener('pointerenter', event => {
         if (!click) return;
         const key = event.target.closest('.drum_key');
         if (!key) return;
@@ -451,8 +454,8 @@ async function key_click() {
         play_drum(drums[key_index - 1]);
     }, true);
 
-    ['pointerup', 'pointerout'].forEach((event) => {
-        drums_keyboards.addEventListener(event, (event) => {
+    ['pointerup', 'pointerout'].forEach(event => {
+        drums_keyboards.addEventListener(event, event => {
             const key = event.target.closest('.drum_key');
             if (!key) return;
             key.style.backgroundColor = '';

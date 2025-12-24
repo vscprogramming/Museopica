@@ -2,46 +2,64 @@
     {
         "num": 1,
         "ja": "バスドラム",
-        "path": "assets/audio/bass.m4a"
+        "en": "Bass Drum",
+        "audio_path": "assets/audio/bass.m4a",
+        "img_path": "assets/img/bass.png"
     },
     {
         "num": 2,
         "ja": "スネアドラム",
-        "path": "assets/audio/snare.m4a"
+        "en": "Snare Drum",
+        "audio_path": "assets/audio/snare.m4a",
+        "img_path": "assets/img/snare.png"
     },
     {
         "num": 4,
         "ja": "フロアタム",
-        "path": "assets/audio/floor.m4a"
+        "en": "Floor Tom",
+        "audio_path": "assets/audio/floor.m4a",
+        "img_path": "assets/img/floor.png"
     },
     {
         "num": 5,
         "ja": "ロータム",
-        "path": "assets/audio/rock.m4a"
+        "en": "Low Tom",
+        "audio_path": "assets/audio/rock.m4a",
+        "img_path": "assets/img/rock.png"
     },
     {
         "num": 6,
         "ja": "ハイタム",
-        "path": "assets/audio/high.m4a"
+        "en": "High Tom",
+        "audio_path": "assets/audio/high.m4a",
+        "img_path": "assets/img/high.png"
     },
     {
         "num": 7,
         "ja": "クローズハイハット",
-        "path": "assets/audio/closed.m4a"
+        "en": "Closed Hi-Hat",
+        "audio_path": "assets/audio/closed.m4a",
+        "img_path": "assets/img/closed.png"
     },
     {
         "num": 8,
         "ja": "オープンハイハット",
-        "path": "assets/audio/open.m4a"
+        "en": "Open Hi-Hat",
+        "audio_path": "assets/audio/open.m4a",
+        "img_path": "assets/img/open.png"
     },
     {
         "num": 9,
         "ja": "クラッシュシンバル",
-        "path": "assets/audio/crash.m4a"
+        "en": "Crash Cymbal",
+        "audio_path": "assets/audio/crash.m4a",
+        "img_path": "assets/img/crash.png"
     },
     {
         "num": 10,
         "ja": "ライドシンバル",
-        "path": "assets/audio/ride.m4a"
+        "en": "Ride Cymbal",
+        "audio_path": "assets/audio/ride.m4a",
+        "img_path": "assets/img/ride.png"
     }
 ]
