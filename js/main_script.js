@@ -1,34 +1,43 @@
 /*
     〇関数解説
-        await keys_generation() => 鍵盤生成処理
-        await UI_prepare() => その他UI準備処理
-        await scroll_syncing() => スクロール同期処理
-        await paint_editer_grid() => エディター内グリッド描画処理
-        await key_click() => 鍵盤クリック処理
+        main => メイン処理
 
     〇変数解説
-        inst_id = 楽器指定（js名）
         audio_context_inst = soundfont-player用（メロディー楽器用）
-        audio_context_drum = webaudiofont用（ドラム用）
+        audio_context_drum = ドラム用
+        inst_id = 楽器指定（js名）
         instruments = 読み込んだ楽器を格納する配列
         drums = 読み込んだ打楽器を格納する配列（buffer）
         current_instrument = 現在選択されている楽器
+        playing = 再生中判断
 */
 
-let inst_id, instruments = [], drums = [], current_instrument;
-let tempo = 100;
 const audio_context_inst = new AudioContext();
 const audio_context_drum = new AudioContext();
+let inst_id, instruments = [], drums = [], current_instrument;
+let playing = false;
+let tempo = 100;
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', main);
+
+async function main() {
+    /*
+        〇関数解説
+            await keys_generation() => 鍵盤生成処理
+            await UI_prepare() => その他UI準備処理
+            await scroll_syncing() => スクロール同期処理
+            await paint_editor_grid() => エディター内グリッド描画処理
+            await key_click() => 鍵盤クリック処理
+    */
+
     document.getElementById('loading').style.display = 'flex';
     await keys_generation();
     await UI_prepare();
     await scroll_syncing();
-    await editer_grid_prepare();
+    await editor_grid_prepare();
     await key_click();
     document.getElementById('loading').style.display = 'none';
-});
+}
 
 function keys_generation() {
     /*
@@ -91,41 +100,60 @@ async function UI_prepare() {
         〇関数解説
             await inst_load() => inst.json読み込み処理
             await drum_load() => drum.json読み込み処理
+            update_slider_property() => 色適用用処理
 
         〇変数解説
             inst_data = メロディー全楽器データ
             drum_data = ドラム全楽器データ
-            inst_select = 楽器選択<select>を格納する変数
-            option_flag = 楽器オプション一括追加用変数
+            inst_sel = 楽器選択<select>を格納する変数
+            opt_flag = 楽器オプション一括追加用変数
             inst = inst_dataの各row
-            option = 楽器<option>を格納する変数
+            opt = 楽器<option>を格納する変数
             inst.num = 楽器番号
             inst.ja = 楽器の日本語名
             inst.js = 楽器指定ID（soundfont-playerの楽器指定に必要）
             sf = 読み込んだ楽器の一時保存定数
             res = 打楽器データ読み込み応答
             binary = 打楽器音声データのバイナリ
+            vol_input = 音量用<input type="range">を格納
+            vol_label = 音量用<label>を格納
+            val_input = 音量（css用）
+            val_label = 音量（DOM表示用）
 
         〇id解説
-            inst_select = 楽器選択用<select>
+            mode_btns = モード変更用button配置用<div>
+            inst_sel = 楽器選択用<select>
+            vol_input = 音量用<input type="range">
+            vol_label = 音量表示
     */
+
+    // モード切替ボタン処理
+    document.querySelectorAll('#mode_btns').forEach(btn => {
+        
+    });
+
+    // 再生ボタン処理
+    document.querySelectorAll('#ctrl_btns').forEach(btn => {
+        
+    });
+
 
     // 楽器選択プルダウン準備
     const inst_data = await inst_load();
     const drum_data = await drum_load();
-    const inst_select = document.getElementById('inst_select');
-    const option_flag = document.createDocumentFragment();
+    const inst_sel = document.getElementById('inst_sel');
+    const opt_flag = document.createDocumentFragment();
     
     inst_data.forEach(inst => {
-        const option = Object.assign(document.createElement('option'), {
+        const opt = Object.assign(document.createElement('option'), {
             value: inst.num,
             textContent: inst.ja
         });
 
-        option_flag.appendChild(option);
+        opt_flag.appendChild(opt);
     });
 
-    inst_select.appendChild(option_flag);
+    inst_sel.appendChild(opt_flag);
     
     // メロディー楽器読み込み
     await Promise.all(inst_data.map(async (inst, i) => {
@@ -147,11 +175,27 @@ async function UI_prepare() {
     const drum_keys = document.querySelectorAll('#drums_keyboards .drum_key');
     drum_data.forEach((drum, i) => drum_keys[i].textContent = drum.en);
 
-    // プルダウン変更時処理
-    inst_select.addEventListener('change', () => {
-        inst_id = inst_data[Number(inst_select.value) - 1].js;
-        current_instrument = instruments[Number(inst_select.selectedIndex)];
+    // 楽器プルダウン変更時処理
+    inst_sel.addEventListener('change', () => {
+        inst_id = inst_data[Number(inst_sel.value) - 1].js;
+        current_instrument = instruments[Number(inst_sel.selectedIndex)];
     });
+
+    // 拍数プルダウン変更時処理
+
+    // 音量スライダー変更時処理
+    const vol_input = document.getElementById('vol_input');
+    const vol_label = document.getElementById('vol_label');
+
+    vol_input.addEventListener('input', update_slider_property);
+    update_slider_property();
+
+    function update_slider_property() {
+        const val_label = vol_input.value
+        const val_input = val_label / vol_input.max * 100;
+        vol_label.textContent = `${val_label}%`;
+        vol_input.style.setProperty('--vol-value', val_input + '%');
+    }
 }
 
 async function inst_load() {
@@ -209,7 +253,7 @@ async function drum_load() {
 function scroll_syncing() {
     /*
         〇変数解説
-            keyboards = すべての鍵盤が入ってるdiv#keyborads
+            keyboards = すべての鍵盤が入ってるdiv#keyboards
             canvas = 描画するcanvasが入ってるdiv#canvas
             syncing = 同期中判断
     */
@@ -234,7 +278,7 @@ function scroll_syncing() {
     });
 }
 
-async function editer_grid_prepare() {
+async function editor_grid_prepare() {
     /*
         〇関数解説
             resize_stage() => canvasのサイズ変更処理
@@ -297,7 +341,7 @@ function paint_stage(canvas_grid) {
         // console.log(x * grid_width);
 
         if (x % 16 == 0) {
-            ctx.strokeStyle = '#0000ff';
+            ctx.strokeStyle = '#00f';
             ctx.lineWidth = 2;
         } else if (x % 4 == 0) {
             ctx.strokeStyle = '#828282';
@@ -317,10 +361,10 @@ function paint_stage(canvas_grid) {
         // console.log(y * grid_height);
 
         if (y < 50 && (y % 7 == 1 || y % 7 == 5)) {
-            ctx.strokeStyle = '#ff0000';
+            ctx.strokeStyle = '#f00';
             ctx.lineWidth = 1;
         } else if (y == 50) {
-            ctx.strokeStyle = '#00ff00';
+            ctx.strokeStyle = '#0f0';
             ctx.lineWidth = 1;
         } else {
             ctx.strokeStyle = '#828282';

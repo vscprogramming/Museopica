@@ -2,9 +2,9 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="css/style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="icon" href="assets/img/icon.png">
+        <link rel="icon" href="assets/img/png/icon.png">
+        <link rel="stylesheet" href="css/style.css">
         <script src="https://unpkg.com/soundfont-player/dist/soundfont-player.js"></script>
         <title>Museopica</title>
     </head>
@@ -12,14 +12,42 @@
         <div id="app">
             <div id="top_ui">
                 <button id="file_btn" class="ui_btn">ファイル</button>
-                <label for="inst_select" class="label">楽器選択</label>
-                <select id="inst_select" class="pulldown" name="instrument">
+                <div id="mode_btns" class="btn_divs">
+                    <button id="lock_btn" class="mode_btns" data-mode="lock">
+                        <img src="assets/img/svg/mode_lock.svg" alt="lock" class="mode_img" draggable="false" title="ロックモード">
+                    </button>
+                    <button id="select_btn" class="mode_btns" data-mode="select">
+                        <img src="assets/img/svg/mode_select.svg" alt="select" class="mode_img" draggable="false" title="選択モード">
+                    </button>
+                    <button id="create_btn" class="mode_btns" data-mode="create">
+                        <img src="assets/img/svg/mode_create.svg" alt="create" class="mode_img" draggable="false" title="追加モード">
+                    </button>
+                    <button id="delete_btn" class="mode_btns" data-mode="delete">
+                        <img src="assets/img/svg/mode_delete.svg" alt="delete" class="mode_img" draggable="false" title="削除モード">
+                    </button>
+                </div>
+                <div id="ctrl_btns" class="btn_divs">
+                    <button id="skip_btn" class="ctrl_btns" data-mode="skip">
+                        <img src="assets/img/svg/ctrl_skip.svg" alt="skip" class="ctrl_img" draggable="false" title="スキップ">
+                    </button>
+                    <button id="play_btn" class="ctrl_btns" data-mode="select">
+                        <img src="assets/img/svg/ctrl_play.svg" alt="play" class="ctrl_img" draggable="false" title="再生/停止">
+                    </button>
+                </div>
+                <select id="inst_sel" class="pulldown" name="instrument" title="楽器選択">
                     <!-- optionはjsで追加 -->
                 </select>
-                <label for="dur_select" class="label">拍数選択</label>
-                <select id="dur_select" class="pulldown" name="duration">
+                <select id="dur_sel" class="pulldown" name="duration" title="拍数選択">
                     <!-- optionはjsで追加 -->
                 </select>
+                <div id="vol" class="property_divs" title="音量">
+                    <img src="assets/img/svg/property_vol.svg" alt="vol" class="property_img" draggable="false">
+                    <label for="vol_input" id="vol_label">
+                        <!-- 音量表記はjsで追加 -->
+                    </label>
+                    <input id="vol_input" type="range" min="0" max="200" value="100" title="音量">
+                </div>
+                <input id="color_input" type="color" value="#03c400" title="ノーツカラー">
             </div>
             <div id="editor">
                 <div id="keyboards">
@@ -40,7 +68,7 @@
                 </div>
             </div>
             <div id="bottom_ui">
-                <p>v0.16</p>
+                <p>v0.17</p>
             </div>
             <div id="modal_div"></div>
         </div>
@@ -48,5 +76,6 @@
             <div id="spinner" class="spinner"></div>
         </div>
         <script type="module" src="js/main_script.js"></script>
+        <script src="js/move_notes.js"></script>
     </body>
 </html>
