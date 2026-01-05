@@ -2,8 +2,18 @@ const audio_context_inst = new AudioContext();
 const audio_context_drum = new AudioContext();
 let inst_id, instruments = [], drums = [];
 let playing = false;
+let mouse_x, mouse_y;
 let mode, current_instrument, duration, vol, color, tempo, key
 let page;
+let x, y, w, h;
+const wkps = new Array(50); // white key points（白鍵y座標　配列）
+const Mwkps = new Array(50); // Mouse white key points（白鍵マウス館y座標　配列）
+const bkps = new Array(35); // black key points（黒鍵y座標　配列）
+const Mbkps = new Array(35); // Mouse black key points（黒鍵マウスy座標　配列）
+const dkps = new Array(9); // drum key points（ドラムy座標　配列）
+const Mdkps = new Array(9); // Mouse drum key points（ドラムマウスy座標　配列）
+const xps = new Array(128); // x points（x座標　配列）
+const Mxps = new Array(128); // Mouse x points（マウスx座標　配列）
 document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
@@ -13,6 +23,7 @@ async function main() {
     await scroll_syncing();
     await editor_grid_prepare();
     await key_click();
+    await move_notes();
     document.getElementById('loading').style.display = 'none';
 
     viewer_debug(); // デバッグ用関数
@@ -79,10 +90,6 @@ async function UI_prepare() {
     });
 
     // 再生ボタン処理
-    document.querySelectorAll('#ctrl_btns').forEach(btn => {
-        
-    });
-
 
     // 楽器選択プルダウン準備
     const inst_data = await inst_load();
@@ -143,7 +150,7 @@ async function UI_prepare() {
         const val_input = val_label / dur_input.max * 100;
         dur_label.textContent = `${val_label}拍`;
         dur_input.style.setProperty('--dur-value', val_input + '%');
-        duration = (60 / tempo) * dur_input.value
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
     }
 
     // 音量スライダー変更時処理
@@ -158,7 +165,7 @@ async function UI_prepare() {
         const val_input = val_label / vol_input.max * 100;
         vol_label.textContent = `${val_label}%`;
         vol_input.style.setProperty('--vol-value', val_input + '%');
-        vol = val_label / 100 * 7;
+        vol = Number((val_label / 100 * 7).toFixed(3));
     }
 
     // カラー変更時
@@ -174,6 +181,29 @@ async function UI_prepare() {
         if (BPM_val < BPM_min) BPM_input.value = BPM_min;
         if (BPM_val > BPM_max) BPM_input.value = BPM_max;
         tempo = Number(BPM_input.value);
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
+    });
+
+    // BPMボタンクリック時
+    const BPM_plus = document.getElementById('BPM_+');
+    const BPM_minus = document.getElementById('BPM_-');
+
+    BPM_plus.addEventListener('click', () => {
+        const BPM_max = Number(BPM_input.max);
+        const BPM_val = Number(BPM_input.value);
+        if (BPM_val >= BPM_max) return;
+        BPM_input.value++;
+        tempo = Number(BPM_input.value);
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
+    });
+
+    BPM_minus.addEventListener('click', () => {
+        const BPM_min = Number(BPM_input.min);
+        const BPM_val = Number(BPM_input.value);
+        if (BPM_val <= BPM_min) return;
+        BPM_input.value--;
+        tempo = Number(BPM_input.value);
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
     });
 
     // キーテキストボックス変更時処理（規制）
@@ -181,6 +211,26 @@ async function UI_prepare() {
     key = Number(key_input.value);
     key_input.addEventListener('input', () => key = Number(key_input.value));
     ['keydown', 'paste'].forEach(event_type => key_input.addEventListener(event_type, event => event.preventDefault()));
+
+    // キーボタンクリック時
+    const key_plus = document.getElementById('key_+');
+    const key_minus = document.getElementById('key_-');
+
+    key_plus.addEventListener('click', () => {
+        const key_max = Number(key_input.max);
+        const key_val = Number(key_input.value);
+        if (key_val >= key_max) return;
+        key_input.value++;
+        key = Number(key_input.value);
+    });
+
+    key_minus.addEventListener('click', () => {
+        const key_min = Number(key_input.min);
+        const key_val = Number(key_input.value);
+        if (key_val <= key_min) return;
+        key_input.value--;
+        key = Number(key_input.value);
+    });
 }
 
 async function inst_load() {
@@ -261,11 +311,13 @@ async function editor_grid_prepare() {
     const canvas_put_notes = document.getElementById('put_notes');
     const canvas_move_notes = document.getElementById('move_notes');
     const div_modal_back = document.getElementById('modal_back');
+    resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back);
+    paint_stage(canvas_grid);
 
-    setInterval(async () => {
-        await resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back);
-        await paint_stage(canvas_grid);
-    }, 1000 / 24);
+    window.addEventListener('resize', () => {
+        resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back);
+        paint_stage(canvas_grid);
+    });
 }
 
 function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back) {
@@ -279,50 +331,64 @@ function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_moda
             height: white_keyboards.height + drums_keyboards.height
         });
     });
+
+    const white_keys = document.querySelectorAll('#white_keyboards .white_key');
+    white_keys.forEach((key, i) => wkps[i] = key.offsetTop + key.offsetHeight / 2);
+    const black_keys = document.querySelectorAll('#black_keyboards .black_key');
+    black_keys.forEach((key, i) => bkps[i] = key.offsetTop + key.offsetHeight / 2);
+    const drums_keys = document.querySelectorAll('#drums_keyboards .drum_key');
+    drums_keys.forEach((key, i) => dkps[i] = (key.offsetTop + key.offsetHeight / 2) + white_keyboards.height);
+
+    const grid_width_half = canvas_grid.getBoundingClientRect().width / 128;
+    let gwf = 0;
+    for (let i = 0; i < xps.length; i++) {
+        gwf += grid_width_half;
+        xps[i] = gwf;
+    }
 }
 
 function paint_stage(canvas_grid) {
     const grid_width = canvas_grid.getBoundingClientRect().width / 64;
     const grid_height = canvas_grid.getBoundingClientRect().height / 59;
-    const ctx = canvas_grid.getContext('2d');
-    ctx.clearRect(0, 0, canvas_grid.width, canvas_grid.height);
+    const grid_ctx = canvas_grid.getContext('2d');
+    grid_ctx.clearRect(0, 0, canvas_grid.width, canvas_grid.height);
 
     for (let x = 1; x <= 64; x++) {
-        ctx.beginPath();
+        grid_ctx.beginPath();
 
         if (x % 16 == 0) {
-            ctx.strokeStyle = '#00f';
-            ctx.lineWidth = 2;
+            grid_ctx.strokeStyle = '#00f';
+            grid_ctx.lineWidth = 2;
         } else if (x % 4 == 0) {
-            ctx.strokeStyle = '#828282';
-            ctx.lineWidth = 1;
+            grid_ctx.strokeStyle = '#828282';
+            grid_ctx.lineWidth = 1;
         } else {
-            ctx.strokeStyle = '#828282';
-            ctx.lineWidth = 0.5;
+            grid_ctx.strokeStyle = '#828282';
+            grid_ctx.lineWidth = 0.5;
         }
 
-        ctx.moveTo(x * grid_width, 0);
-        ctx.lineTo(x * grid_width, canvas_grid.height);
-        ctx.stroke();
+        grid_ctx.moveTo(x * grid_width, 0);
+        grid_ctx.lineTo(x * grid_width, canvas_grid.height);
+        grid_ctx.stroke();
     }
 
     for (let y = 1; y <= 58; y++) {
-        ctx.beginPath();
+        grid_ctx.beginPath();
 
         if (y < 50 && (y % 7 == 1 || y % 7 == 5)) {
-            ctx.strokeStyle = '#f00';
-            ctx.lineWidth = 1;
+            grid_ctx.strokeStyle = '#f00';
+            grid_ctx.lineWidth = 1;
         } else if (y == 50) {
-            ctx.strokeStyle = '#0f0';
-            ctx.lineWidth = 1;
+            grid_ctx.strokeStyle = '#0f0';
+            grid_ctx.lineWidth = 1;
         } else {
-            ctx.strokeStyle = '#828282';
-            ctx.lineWidth = 0.5;
+            grid_ctx.strokeStyle = '#828282';
+            grid_ctx.lineWidth = 0.5;
         }
 
-        ctx.moveTo(0, y * grid_height);
-        ctx.lineTo(canvas_grid.width, y * grid_height);
-        ctx.stroke();
+        grid_ctx.moveTo(0, y * grid_height);
+        grid_ctx.lineTo(canvas_grid.width, y * grid_height);
+        grid_ctx.stroke();
     }
 }
 
@@ -464,6 +530,83 @@ async function pitch_load() {
     window.location.reload();
 }
 
+function move_notes() {
+    const canvas_move_notes = document.getElementById('move_notes');
+    const mn_ctx = canvas_move_notes.getContext('2d');
+
+    canvas_move_notes.addEventListener('mousemove', event => {
+        if (mode != 'create') {
+            mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
+            return;
+        }
+        const grid_width = canvas_move_notes.getBoundingClientRect().width / 16;    // 1拍分の長さ
+        const grid_height = canvas_move_notes.getBoundingClientRect().height / 59;
+        const beat = document.getElementById('dur_input').value;
+        const canvas_rect = canvas_move_notes.getBoundingClientRect();
+        mouse_x = event.clientX - canvas_rect.left;
+        mouse_y = event.clientY - canvas_rect.top;
+
+        if (mouse_x <= 0 || mouse_y <= 0) {
+            mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
+            return;
+        }
+
+        for (let i = 0; i < wkps.length; i++) Mwkps[i] = Math.abs(mouse_y - wkps[i]);
+        for (let i = 0; i < bkps.length; i++) Mbkps[i] = Math.abs(mouse_y - bkps[i]);
+        for (let i = 0; i < dkps.length; i++) Mdkps[i] = Math.abs(mouse_y - dkps[i]);
+        for (let i = 0; i < xps.length; i++) Mxps[i] = Math.abs(mouse_x - xps[i]);
+        
+        const Mwk_min = Math.min(...Mwkps);
+        const Mbk_min = Math.min(...Mbkps);
+        const Mdk_min = Math.min(...Mdkps);
+        const Mxp_min = Math.min(...Mxps);
+
+        if ((Mdk_min < Mwk_min) && (Mdk_min < Mbk_min)) {
+            mn_ctx.fillStyle = color + 'aa';
+            x = xps[Mxps.indexOf(Mxp_min)];
+            y = dkps[Mdkps.indexOf(Mdk_min)] - (grid_height / 2);
+            w = grid_width * beat;
+            h = grid_height;
+        } else if (Mwk_min < Mbk_min) {
+            mn_ctx.fillStyle = color + 'aa';
+            x = xps[Mxps.indexOf(Mxp_min)];
+            y = wkps[Mwkps.indexOf(Mwk_min)] - (grid_height / 2);
+            w = grid_width * beat;
+            h = grid_height;
+        } else {
+            mn_ctx.fillStyle = darken_color(color, 34) + 'aa';
+            x = xps[Mxps.indexOf(Mxp_min)];
+            y = bkps[Mbkps.indexOf(Mbk_min)] - (grid_height * 0.6 / 2);
+            w = grid_width * beat;
+            h = grid_height * 0.6;
+        }
+
+        mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
+        mn_ctx.fillRect(x, y, w, h);
+    });
+}
+
+function darken_color(hex, percent) {
+    hex = hex.replace('#', '');
+
+    let red = parseInt(hex.slice(0, 2), 16);
+    let green = parseInt(hex.slice(2, 4), 16);
+    let blue = parseInt(hex.slice(4, 6), 16);
+
+    const factor = 1 - percent / 100;
+
+    red = Math.round(red * factor);
+    green = Math.round(green * factor);
+    blue = Math.round(blue * factor);
+
+    return (
+        '#' + 
+        red.toString(16).padStart(2, '0') +
+        green.toString(16).padStart(2, '0') +
+        blue.toString(16).padStart(2, '0')
+    );
+}
+
 function viewer_debug() {
     const debug_text = document.getElementById('debug_text');
 
@@ -474,6 +617,14 @@ function viewer_debug() {
             vol：${vol}
             color：${color}
             BPM：${tempo}
-            key：${key}`;
+            key：${key}
+            
+            mouse_x：${Math.round(mouse_x)}
+            mouse_y：${Math.round(mouse_y)}
+            
+            notes_X：${Math.round(x)}
+            notes_y：${Math.round(y)}
+            notes_width：${Math.round(w)}
+            notes_height：${Math.round(h)}`;
     }, 1000 / 60);
 }

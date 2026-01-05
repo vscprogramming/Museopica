@@ -56,12 +56,14 @@
                 <label id="BPM_label" for="BPM_input">BPM</label>
                 <input id="BPM_input" type="number" min="20" max="500" value="100" title="テンポ">
                 <div id="BPM_ctrls" class="ctrls">
-
+                    <button id="BPM_+" class="BPM_ctrls">+</button>
+                    <button id="BPM_-" class="BPM_ctrls">-</button>
                 </div>
                 <label id="key_label" for="key_input">key</label>
                 <input id="key_input" type="number" min="-11" max="11" value="0" title="キー">
                 <div id="key_ctrls" class="ctrls">
-                    
+                    <button id="key_+" class="key_ctrls">+</button>
+                    <button id="key_-" class="key_ctrls">-</button>
                 </div>
             </div>
             <div id="editor">
@@ -93,7 +95,7 @@
                 </div>
             </div>
             <div id="bottom_ui">
-                <p>v0.18</p>
+                <p>v0.19</p>
             </div>
             <!-- モーダル類 -->
             <div id="modal_back">
@@ -111,6 +113,5 @@
             <div id="spinner" class="spinner"></div>
         </div>
         <script type="module" src="js/main_script.js"></script>
-        <script src="js/move_notes.js"></script>
     </body>
 </html>
