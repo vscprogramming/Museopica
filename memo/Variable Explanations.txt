@@ -1,0 +1,144 @@
+root:
+    〇関数解説
+        main => メイン処理
+        viewer_debug => デバッグ用処理
+
+    〇変数解説
+        audio_context_inst = soundfont-player用（メロディー楽器用）
+        audio_context_drum = ドラム用
+        inst_id = 楽器指定（js名）
+        instruments = 読み込んだ楽器を格納する配列
+        drums = 読み込んだ打楽器を格納する配列（buffer）
+        playing = 再生中判断
+        mode = 現在のモード
+        current_instrument = 現在選択されている楽器
+        duration = 拍数
+        vol = ノーツの音量
+        tempo = テンポ
+        color = ノーツカラー
+        key = キー
+
+
+main
+    〇関数解説
+        await keys_generation() => 鍵盤生成処理
+        await UI_prepare() => その他UI準備処理
+        await scroll_syncing() => スクロール同期処理
+        await paint_editor_grid() => エディター内グリッド描画処理
+        await key_click() => 鍵盤クリック処理
+
+
+keys_generation
+    〇変数解説
+        white_key = 白鍵のbuttonを格納する変数
+        black_key = 黒鍵のbuttonを格納する変数
+        drum_key = ドラム鍵盤のbuttonを格納する変数
+
+        white_flag = 白鍵一括追加用変数
+        black_flag = 黒鍵一括追加用変数
+        drums_flag = ドラム鍵盤一括追加用変数
+
+    〇クラス名解説
+        white_key = 全白鍵に付与
+        black_key = 全黒鍵に付与
+        drum_key = 全ドラム鍵盤に付与
+
+    〇id解説
+        white_keyboards = 白鍵を配置するdiv
+        black_keyboards = 黒鍵を配置するdiv
+        drums_keyboards = ドラム鍵盤を配置するdiv
+
+
+UI_prepare
+    〇関数解説
+        await inst_load() => inst.json読み込み処理
+        await drum_load() => drum.json読み込み処理
+        vol_update_slider_property() => 音量スライダー色適用用処理
+
+    〇変数解説
+        inst_data = メロディー全楽器データ
+        drum_data = ドラム全楽器データ
+        inst_sel = 楽器選択<select>を格納する変数
+        inst_opt_flag = 楽器オプション一括追加用変数
+        inst = inst_dataの各row
+        opt = 楽器<option>を格納する変数
+        inst.num = 楽器番号
+        inst.ja = 楽器の日本語名
+        inst.js = 楽器指定ID（soundfont-playerの楽器指定に必要）
+        sf = 読み込んだ楽器の一時保存定数
+        res = 打楽器データ読み込み応答
+        binary = 打楽器音声データのバイナリ
+        vol_input = 音量用<input type="range">を格納
+        vol_label = 音量用<label>を格納
+        val_input = 音量（css用）
+        val_label = 音量（DOM表示用）
+
+    〇id解説
+        mode_btns = モード変更用button配置用<div>
+        inst_sel = 楽器選択用<select>
+        vol_input = 音量用<input type="range">
+        vol_label = 音量表示
+
+
+scroll_syncing
+    〇変数解説
+        keyboards = すべての鍵盤が入ってるdiv#keyboards
+        canvas = 描画するcanvasが入ってるdiv#canvas
+        syncing = 同期中判断
+
+
+editor_grid_prepare
+    〇関数解説
+        resize_stage() => canvasのサイズ変更処理
+        paint_stage() => canvasの描画
+
+    〇変数解説
+        canvas_grid = グリッドを描画するcanvas本体
+        canvas_move_notes = 設置する前の動くノーツを描画するcanvas本体
+        canvas_put_notes = 設置されたノーツを描画するcanvas本体
+
+
+resize_stage
+    〇変数解説
+        canvas_grid = 描画するcanvas#grid
+        white_keyboards = div#white_keyboardsのCSS計算後のstyle
+        drums_keyboards = div#drums_keyboardsのCSS計算後のstyle
+
+
+paint_stage
+    〇変数解説
+        grid_width = 描画するグリッド1つ分の横幅
+        grid_height = 描画するグリッド1つ分の縦幅
+        ctx = 2dコンテキストを取得
+
+
+key_click
+    〇関数解説
+        await pitch_load() => pitch.jsonから音階を読み取る処理
+        drum_play() => ドラム再生処理
+
+    〇変数解説
+        click = マウスクリック判定
+
+        white_keyboards = 白鍵を配置するdiv
+        black_keyboards = 黒鍵を配置するdiv
+        drums_keyboards = ドラム鍵盤を配置するdiv
+
+        pitch_data = すべての音階が格納されている配列
+
+        key = クリックされたbutton
+        key_index = クリックされたbuttonのdataset.key_index
+        event = 
+
+
+viewer_debug
+    ◎デバッグ用関数
+        〇表示内容
+            現在のモード（mode）
+            現在の楽器（current_instrument）
+            現在の拍数（duration）
+            現在の音量（vol）
+            現在のカラー（color）
+            現在のテンポ（tempo）
+            現在のキー（key）
+

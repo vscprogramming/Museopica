@@ -1,35 +1,12 @@
-/*
-    〇関数解説
-        main => メイン処理
-
-    〇変数解説
-        audio_context_inst = soundfont-player用（メロディー楽器用）
-        audio_context_drum = ドラム用
-        inst_id = 楽器指定（js名）
-        instruments = 読み込んだ楽器を格納する配列
-        drums = 読み込んだ打楽器を格納する配列（buffer）
-        current_instrument = 現在選択されている楽器
-        playing = 再生中判断
-*/
-
 const audio_context_inst = new AudioContext();
 const audio_context_drum = new AudioContext();
-let inst_id, instruments = [], drums = [], current_instrument;
+let inst_id, instruments = [], drums = [];
 let playing = false;
-let tempo = 100;
-
+let mode, current_instrument, duration, vol, color, tempo, key
+let page;
 document.addEventListener('DOMContentLoaded', main);
 
 async function main() {
-    /*
-        〇関数解説
-            await keys_generation() => 鍵盤生成処理
-            await UI_prepare() => その他UI準備処理
-            await scroll_syncing() => スクロール同期処理
-            await paint_editor_grid() => エディター内グリッド描画処理
-            await key_click() => 鍵盤クリック処理
-    */
-
     document.getElementById('loading').style.display = 'flex';
     await keys_generation();
     await UI_prepare();
@@ -37,30 +14,11 @@ async function main() {
     await editor_grid_prepare();
     await key_click();
     document.getElementById('loading').style.display = 'none';
+
+    viewer_debug(); // デバッグ用関数
 }
 
 function keys_generation() {
-    /*
-        〇変数解説
-            white_key = 白鍵のbuttonを格納する変数
-            black_key = 黒鍵のbuttonを格納する変数
-            drum_key = ドラム鍵盤のbuttonを格納する変数
-
-            white_flag = 白鍵一括追加用変数
-            black_flag = 黒鍵一括追加用変数
-            drums_flag = ドラム鍵盤一括追加用変数
-
-        〇クラス名解説
-            white_key = 全白鍵に付与
-            black_key = 全黒鍵に付与
-            drum_key = 全ドラム鍵盤に付与
-
-        〇id解説
-            white_keyboards = 白鍵を配置するdiv
-            black_keyboards = 黒鍵を配置するdiv
-            drums_keyboards = ドラム鍵盤を配置するdiv
-    */
-
     const white_keyboards = document.getElementById('white_keyboards');
     const black_keyboards = document.getElementById('black_keyboards');
     const drums_keyboards = document.getElementById('drums_keyboards');
@@ -96,40 +54,28 @@ function keys_generation() {
 }
 
 async function UI_prepare() {
-    /*
-        〇関数解説
-            await inst_load() => inst.json読み込み処理
-            await drum_load() => drum.json読み込み処理
-            update_slider_property() => 色適用用処理
+    // ファイルボタン押下時
+    const file_btn = document.getElementById('file_btn');
+    const modal_back = document.getElementById('modal_back');
 
-        〇変数解説
-            inst_data = メロディー全楽器データ
-            drum_data = ドラム全楽器データ
-            inst_sel = 楽器選択<select>を格納する変数
-            opt_flag = 楽器オプション一括追加用変数
-            inst = inst_dataの各row
-            opt = 楽器<option>を格納する変数
-            inst.num = 楽器番号
-            inst.ja = 楽器の日本語名
-            inst.js = 楽器指定ID（soundfont-playerの楽器指定に必要）
-            sf = 読み込んだ楽器の一時保存定数
-            res = 打楽器データ読み込み応答
-            binary = 打楽器音声データのバイナリ
-            vol_input = 音量用<input type="range">を格納
-            vol_label = 音量用<label>を格納
-            val_input = 音量（css用）
-            val_label = 音量（DOM表示用）
+    file_btn.addEventListener('click', () => {
+        if (modal_back.classList == 'show') modal_back.classList.remove('show');
+        else modal_back.classList.add('show');
+    });
 
-        〇id解説
-            mode_btns = モード変更用button配置用<div>
-            inst_sel = 楽器選択用<select>
-            vol_input = 音量用<input type="range">
-            vol_label = 音量表示
-    */
+    modal_back.addEventListener('click', () => modal_back.classList.remove('show'));
 
     // モード切替ボタン処理
-    document.querySelectorAll('#mode_btns').forEach(btn => {
-        
+    mode = 'lock';
+    document.getElementById('lock_btn').classList.add('selected');
+
+    document.getElementById('mode_btns').addEventListener('click', event => {
+        if (event.target.tagName === 'BUTTON') {
+            if (mode == event.target.dataset.mode) return;
+            mode = event.target.dataset.mode;
+            document.querySelectorAll('#mode_btns button').forEach(btn => { btn.classList.remove('selected') });
+            event.target.classList.add('selected');
+        }
     });
 
     // 再生ボタン処理
@@ -142,7 +88,7 @@ async function UI_prepare() {
     const inst_data = await inst_load();
     const drum_data = await drum_load();
     const inst_sel = document.getElementById('inst_sel');
-    const opt_flag = document.createDocumentFragment();
+    const inst_opt_flag = document.createDocumentFragment();
     
     inst_data.forEach(inst => {
         const opt = Object.assign(document.createElement('option'), {
@@ -150,10 +96,10 @@ async function UI_prepare() {
             textContent: inst.ja
         });
 
-        opt_flag.appendChild(opt);
+        inst_opt_flag.appendChild(opt);
     });
 
-    inst_sel.appendChild(opt_flag);
+    inst_sel.appendChild(inst_opt_flag);
     
     // メロディー楽器読み込み
     await Promise.all(inst_data.map(async (inst, i) => {
@@ -181,21 +127,60 @@ async function UI_prepare() {
         current_instrument = instruments[Number(inst_sel.selectedIndex)];
     });
 
-    // 拍数プルダウン変更時処理
+    // テンポ初期処理
+    const BPM_input = document.getElementById('BPM_input');
+    tempo = Number(BPM_input.value);
+
+    // 拍数スライダー変更時処理
+    const dur_input = document.getElementById('dur_input');
+    const dur_label = document.getElementById('dur_label');
+
+    dur_input.addEventListener('input', dur_update_slider_property);
+    dur_update_slider_property();
+
+    function dur_update_slider_property() {
+        const val_label = dur_input.value
+        const val_input = val_label / dur_input.max * 100;
+        dur_label.textContent = `${val_label}拍`;
+        dur_input.style.setProperty('--dur-value', val_input + '%');
+        duration = (60 / tempo) * dur_input.value
+    }
 
     // 音量スライダー変更時処理
     const vol_input = document.getElementById('vol_input');
     const vol_label = document.getElementById('vol_label');
 
-    vol_input.addEventListener('input', update_slider_property);
-    update_slider_property();
+    vol_input.addEventListener('input', vol_update_slider_property);
+    vol_update_slider_property();
 
-    function update_slider_property() {
+    function vol_update_slider_property() {
         const val_label = vol_input.value
         const val_input = val_label / vol_input.max * 100;
         vol_label.textContent = `${val_label}%`;
         vol_input.style.setProperty('--vol-value', val_input + '%');
+        vol = val_label / 100 * 7;
     }
+
+    // カラー変更時
+    const color_input = document.getElementById('color_input');
+    color = color_input.value;
+    color_input.addEventListener('input', () => color = color_input.value);
+
+    // BPMテキストボックス変更時処理（規制）
+    BPM_input.addEventListener('change', () => {
+        const BPM_min = Number(BPM_input.min);
+        const BPM_max = Number(BPM_input.max);
+        const BPM_val = Number(BPM_input.value);
+        if (BPM_val < BPM_min) BPM_input.value = BPM_min;
+        if (BPM_val > BPM_max) BPM_input.value = BPM_max;
+        tempo = Number(BPM_input.value);
+    });
+
+    // キーテキストボックス変更時処理（規制）
+    const key_input = document.getElementById('key_input');
+    key = Number(key_input.value);
+    key_input.addEventListener('input', () => key = Number(key_input.value));
+    ['keydown', 'paste'].forEach(event_type => key_input.addEventListener(event_type, event => event.preventDefault()));
 }
 
 async function inst_load() {
@@ -251,13 +236,6 @@ async function drum_load() {
 }
 
 function scroll_syncing() {
-    /*
-        〇変数解説
-            keyboards = すべての鍵盤が入ってるdiv#keyboards
-            canvas = 描画するcanvasが入ってるdiv#canvas
-            syncing = 同期中判断
-    */
-
     const keyboards = document.getElementById('keyboards');
     const canvas = document.getElementById('canvas');
 
@@ -279,43 +257,23 @@ function scroll_syncing() {
 }
 
 async function editor_grid_prepare() {
-    /*
-        〇関数解説
-            resize_stage() => canvasのサイズ変更処理
-            paint_stage() => canvasの描画
-
-        〇変数解説
-            canvas_grid = グリッドを描画するcanvas本体
-            canvas_move_notes = 設置する前の動くノーツを描画するcanvas本体
-            canvas_put_notes = 設置されたノーツを描画するcanvas本体
-    */
-
     const canvas_grid = document.getElementById('grid');
     const canvas_put_notes = document.getElementById('put_notes');
     const canvas_move_notes = document.getElementById('move_notes');
-    await resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes);
-    await paint_stage(canvas_grid);
+    const div_modal_back = document.getElementById('modal_back');
 
-    window.addEventListener('resize', async () => {
-        await resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes);
+    setInterval(async () => {
+        await resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back);
         await paint_stage(canvas_grid);
-    });
+    }, 1000 / 24);
 }
 
-function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes) {
-    /*
-        〇変数解説
-            canvas_grid = 描画するcanvas#grid
-            white_keyboards = div#white_keyboardsのCSS計算後のstyle
-            drums_keyboards = div#drums_keyboardsのCSS計算後のstyle
-    */
-
+function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back) {
     const div_canvas = document.getElementById('canvas').getBoundingClientRect();
     const white_keyboards = document.getElementById('white_keyboards').getBoundingClientRect();
     const drums_keyboards = document.getElementById('drums_keyboards').getBoundingClientRect();
-    // console.log(white_keyboards.height + drums_keyboards.height);
 
-    [canvas_grid, canvas_put_notes, canvas_move_notes].forEach(canvas => {
+    [canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back].forEach(canvas => {
         Object.assign(canvas, {
             width: div_canvas.width - 7,
             height: white_keyboards.height + drums_keyboards.height
@@ -324,21 +282,13 @@ function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes) {
 }
 
 function paint_stage(canvas_grid) {
-    /*
-        〇変数解説
-            grid_width = 描画するグリッド1つ分の横幅
-            grid_height = 描画するグリッド1つ分の縦幅
-            ctx = 2dコンテキストを取得
-    */
     const grid_width = canvas_grid.getBoundingClientRect().width / 64;
     const grid_height = canvas_grid.getBoundingClientRect().height / 59;
-    // console.log(grid_width, grid_height)
     const ctx = canvas_grid.getContext('2d');
     ctx.clearRect(0, 0, canvas_grid.width, canvas_grid.height);
 
     for (let x = 1; x <= 64; x++) {
         ctx.beginPath();
-        // console.log(x * grid_width);
 
         if (x % 16 == 0) {
             ctx.strokeStyle = '#00f';
@@ -358,7 +308,6 @@ function paint_stage(canvas_grid) {
 
     for (let y = 1; y <= 58; y++) {
         ctx.beginPath();
-        // console.log(y * grid_height);
 
         if (y < 50 && (y % 7 == 1 || y % 7 == 5)) {
             ctx.strokeStyle = '#f00';
@@ -378,25 +327,6 @@ function paint_stage(canvas_grid) {
 }
 
 async function key_click() {
-    /*
-        〇関数解説
-            await pitch_load() => pitch.jsonから音階を読み取る処理
-            drum_play() => ドラム再生処理
-
-        〇変数解説
-            click = マウスクリック判定
-
-            white_keyboards = 白鍵を配置するdiv
-            black_keyboards = 黒鍵を配置するdiv
-            drums_keyboards = ドラム鍵盤を配置するdiv
-
-            pitch_data = すべての音階が格納されている配列
-
-            key = クリックされたbutton
-            key_index = クリックされたbuttonのdataset.key_index
-            event = 
-    */
-
     const pitch_data = await pitch_load();
     let click = false;
     document.addEventListener('pointerdown', () => click = true);
@@ -410,11 +340,10 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#aaa';
         const key_index = Number(key.dataset.key_index);
-        // console.log(key_index);
         if (!current_instrument) return;
 
         current_instrument.play(pitch_data.white[key_index - 1], audio_context_inst.currentTime, {
-            gain: 7,
+            gain: vol,
             duration: (60 / tempo) / 2
         });
     });
@@ -425,11 +354,10 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#aaa';
         const key_index = Number(key.dataset.key_index);
-        // console.log(key_index);
         if (!current_instrument) return;
 
         current_instrument.play(pitch_data.white[key_index - 1], audio_context_inst.currentTime, {
-            gain: 7,
+            gain: vol,
             duration: (60 / tempo) / 2
         });
     }, true);
@@ -447,11 +375,10 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#555';
         const key_index = Number(key.dataset.key_index);
-        // console.log(key_index);
         if (!current_instrument) return;
         
         current_instrument.play(pitch_data.black[key_index - 1], audio_context_inst.currentTime, {
-            gain: 7,
+            gain: vol,
             duration: (60 / tempo) / 2
         });
     });
@@ -462,11 +389,10 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#555'
         const key_index = Number(key.dataset.key_index);
-        // console.log(key_index);
         if (!current_instrument) return;
 
         current_instrument.play(pitch_data.black[key_index - 1], audio_context_inst.currentTime, {
-            gain: 7,
+            gain: vol,
             duration: (60 / tempo) / 2
         });
     }, true);
@@ -484,7 +410,6 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#aaa';
         const key_index = Number(key.dataset.key_index);
-        // console.log(key_index);
         play_drum(drums[key_index - 1]);
     });
 
@@ -494,7 +419,6 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#aaa';
         const key_index = Number(key.dataset.key_index);
-        // console.log(key_index);
         play_drum(drums[key_index - 1]);
     }, true);
 
@@ -538,4 +462,18 @@ async function pitch_load() {
 
     alert('音階情報が読み取れませんでした。\nネットワーク接続を確認の上、もう一度再読み込みしてください。\nOKをクリックすると再読み込みを行います。');
     window.location.reload();
+}
+
+function viewer_debug() {
+    const debug_text = document.getElementById('debug_text');
+
+    setInterval(() => {
+        debug_text.textContent = `mode：${mode}
+            inst：${current_instrument.name}
+            dur：${duration}s
+            vol：${vol}
+            color：${color}
+            BPM：${tempo}
+            key：${key}`;
+    }, 1000 / 60);
 }

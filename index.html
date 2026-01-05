@@ -11,35 +11,40 @@
     <body>
         <div id="app">
             <div id="top_ui">
-                <button id="file_btn" class="ui_btn">ファイル</button>
+                <button id="file_btn" class="file_btns" title="ファイル">
+                    <img src="assets/img/svg/folder.svg" alt="file" class="file_img" draggable="false">
+                </button>
                 <div id="mode_btns" class="btn_divs">
-                    <button id="lock_btn" class="mode_btns" data-mode="lock">
-                        <img src="assets/img/svg/mode_lock.svg" alt="lock" class="mode_img" draggable="false" title="ロックモード">
+                    <button id="lock_btn" class="mode_btns" data-mode="lock" title="ロックモード">
+                        <img src="assets/img/svg/mode_lock.svg" alt="lock" class="mode_img" draggable="false">
                     </button>
-                    <button id="select_btn" class="mode_btns" data-mode="select">
-                        <img src="assets/img/svg/mode_select.svg" alt="select" class="mode_img" draggable="false" title="選択モード">
+                    <button id="select_btn" class="mode_btns" data-mode="select" title="選択モード">
+                        <img src="assets/img/svg/mode_select.svg" alt="select" class="mode_img" draggable="false">
                     </button>
-                    <button id="create_btn" class="mode_btns" data-mode="create">
-                        <img src="assets/img/svg/mode_create.svg" alt="create" class="mode_img" draggable="false" title="追加モード">
+                    <button id="create_btn" class="mode_btns" data-mode="create" title="追加モード">
+                        <img src="assets/img/svg/mode_create.svg" alt="create" class="mode_img" draggable="false">
                     </button>
-                    <button id="delete_btn" class="mode_btns" data-mode="delete">
-                        <img src="assets/img/svg/mode_delete.svg" alt="delete" class="mode_img" draggable="false" title="削除モード">
+                    <button id="delete_btn" class="mode_btns" data-mode="delete" title="削除モード">
+                        <img src="assets/img/svg/mode_delete.svg" alt="delete" class="mode_img" draggable="false">
                     </button>
                 </div>
                 <div id="ctrl_btns" class="btn_divs">
-                    <button id="skip_btn" class="ctrl_btns" data-mode="skip">
-                        <img src="assets/img/svg/ctrl_skip.svg" alt="skip" class="ctrl_img" draggable="false" title="スキップ">
+                    <button id="skip_btn" class="ctrl_btns" title="スキップ">
+                        <img src="assets/img/svg/ctrl_skip.svg" alt="skip" class="ctrl_img" draggable="false">
                     </button>
-                    <button id="play_btn" class="ctrl_btns" data-mode="select">
-                        <img src="assets/img/svg/ctrl_play.svg" alt="play" class="ctrl_img" draggable="false" title="再生/停止">
+                    <button id="play_btn" class="ctrl_btns" title="再生/停止">
+                        <img src="assets/img/svg/ctrl_play.svg" alt="play" class="ctrl_img" draggable="false">
                     </button>
                 </div>
                 <select id="inst_sel" class="pulldown" name="instrument" title="楽器選択">
                     <!-- optionはjsで追加 -->
                 </select>
-                <select id="dur_sel" class="pulldown" name="duration" title="拍数選択">
-                    <!-- optionはjsで追加 -->
-                </select>
+                <div id="dur" class="property_divs" title="拍数">
+                    <label for="dur_input" id="dur_label">
+                        <!-- 拍数表記はjsで追加 -->
+                    </label>
+                    <input id="dur_input" type="range" min="0.125" max="4" step="0.125" value="0.25" title="拍数">
+                </div>
                 <div id="vol" class="property_divs" title="音量">
                     <img src="assets/img/svg/property_vol.svg" alt="vol" class="property_img" draggable="false">
                     <label for="vol_input" id="vol_label">
@@ -48,6 +53,16 @@
                     <input id="vol_input" type="range" min="0" max="200" value="100" title="音量">
                 </div>
                 <input id="color_input" type="color" value="#03c400" title="ノーツカラー">
+                <label id="BPM_label" for="BPM_input">BPM</label>
+                <input id="BPM_input" type="number" min="20" max="500" value="100" title="テンポ">
+                <div id="BPM_ctrls" class="ctrls">
+
+                </div>
+                <label id="key_label" for="key_input">key</label>
+                <input id="key_input" type="number" min="-11" max="11" value="0" title="キー">
+                <div id="key_ctrls" class="ctrls">
+                    
+                </div>
             </div>
             <div id="editor">
                 <div id="keyboards">
@@ -66,11 +81,31 @@
                     <canvas id="put_notes" class="canvas"></canvas>
                     <canvas id="move_notes" class="canvas"></canvas>
                 </div>
+                <!-- 詳細情報表示エリア -->
+                <div id="info">
+                    <div id="notes_info">
+
+                    </div>
+                    <div id="debug_area">
+                        <h3>デバッグモード</h3>
+                        <P id="debug_text"></P>
+                    </div>
+                </div>
             </div>
             <div id="bottom_ui">
-                <p>v0.17</p>
+                <p>v0.18</p>
             </div>
-            <div id="modal_div"></div>
+            <!-- モーダル類 -->
+            <div id="modal_back">
+                <div id="file_modal">
+                    <button id="save_opt" class="file_opts">保存</button>
+                    <button id="load_opt" class="file_opts">ファイルを開く</button>
+                    <button id="settings_opt" class="file_opts">設定</button>
+                </div>
+                <div id="settings_modal">
+                    
+                </div>
+            </div>
         </div>
         <div id="loading" class="loading">
             <div id="spinner" class="spinner"></div>
