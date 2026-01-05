@@ -4,7 +4,8 @@ let inst_id, instruments = [], drums = [];
 let playing = false;
 let mouse_x, mouse_y;
 let mode, current_instrument, duration, vol, color, tempo, key
-let page;
+let notes, page = 1;
+let waiting_time;
 let x, y, w, h;
 const wkps = new Array(50); // white key points（白鍵y座標　配列）
 const Mwkps = new Array(50); // Mouse white key points（白鍵マウス館y座標　配列）
@@ -342,8 +343,8 @@ function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_moda
     const grid_width_half = canvas_grid.getBoundingClientRect().width / 128;
     let gwf = 0;
     for (let i = 0; i < xps.length; i++) {
-        gwf += grid_width_half;
         xps[i] = gwf;
+        gwf += grid_width_half;
     }
 }
 
@@ -534,11 +535,12 @@ function move_notes() {
     const canvas_move_notes = document.getElementById('move_notes');
     const mn_ctx = canvas_move_notes.getContext('2d');
 
-    canvas_move_notes.addEventListener('mousemove', event => {
+    ['mousemove', 'scroll'].forEach(event_type => window.addEventListener(event_type, event => {
         if (mode != 'create') {
             mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
             return;
         }
+    
         const grid_width = canvas_move_notes.getBoundingClientRect().width / 16;    // 1拍分の長さ
         const grid_height = canvas_move_notes.getBoundingClientRect().height / 59;
         const beat = document.getElementById('dur_input').value;
@@ -560,30 +562,28 @@ function move_notes() {
         const Mbk_min = Math.min(...Mbkps);
         const Mdk_min = Math.min(...Mdkps);
         const Mxp_min = Math.min(...Mxps);
+        
+        x = xps[Mxps.indexOf(Mxp_min)];
+        w = grid_width * beat;
+        // waiting_time = (page - 1) * duration * 128 + (Mxps.indexOf(Mxp_min)) * duration;
 
         if ((Mdk_min < Mwk_min) && (Mdk_min < Mbk_min)) {
             mn_ctx.fillStyle = color + 'aa';
-            x = xps[Mxps.indexOf(Mxp_min)];
             y = dkps[Mdkps.indexOf(Mdk_min)] - (grid_height / 2);
-            w = grid_width * beat;
             h = grid_height;
         } else if (Mwk_min < Mbk_min) {
             mn_ctx.fillStyle = color + 'aa';
-            x = xps[Mxps.indexOf(Mxp_min)];
             y = wkps[Mwkps.indexOf(Mwk_min)] - (grid_height / 2);
-            w = grid_width * beat;
             h = grid_height;
         } else {
             mn_ctx.fillStyle = darken_color(color, 34) + 'aa';
-            x = xps[Mxps.indexOf(Mxp_min)];
             y = bkps[Mbkps.indexOf(Mbk_min)] - (grid_height * 0.6 / 2);
-            w = grid_width * beat;
             h = grid_height * 0.6;
         }
 
         mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
         mn_ctx.fillRect(x, y, w, h);
-    });
+    }));
 }
 
 function darken_color(hex, percent) {
@@ -618,6 +618,10 @@ function viewer_debug() {
             color：${color}
             BPM：${tempo}
             key：${key}
+
+            waiting_time：${Number(waiting_time).toFixed(3)}
+
+            page：${page}
             
             mouse_x：${Math.round(mouse_x)}
             mouse_y：${Math.round(mouse_y)}
