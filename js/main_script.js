@@ -3,9 +3,14 @@ const audio_context_drum = new AudioContext();
 let inst_id, instruments = [], drums = [];
 let playing = false;
 let mouse_x, mouse_y;
-let mode, current_instrument, duration, vol, color, tempo, key
-let notes, page = 1;
-let waiting_time;
+let black_notes_judge;
+let mode, current_instrument, duration, vol, color, tempo, key;
+let notes = 0, clone = 0, played_notes = 0, time = '0:00:00', hour, minute, second, beats = '4, 4', page = 1;
+let start;
+const notes_data = [], save_data = {
+    notes: new Array(99998),
+    var: 0.21
+};
 let x, y, w, h;
 const wkps = new Array(50); // white key points（白鍵y座標　配列）
 const Mwkps = new Array(50); // Mouse white key points（白鍵マウス館y座標　配列）
@@ -20,11 +25,13 @@ document.addEventListener('DOMContentLoaded', main);
 async function main() {
     document.getElementById('loading').style.display = 'flex';
     await keys_generation();
-    await UI_prepare();
+    await top_UI_prepare();
+    await bottom_UI_prepare();
     await scroll_syncing();
     await editor_grid_prepare();
     await key_click();
     await move_notes();
+    await edit();
     document.getElementById('loading').style.display = 'none';
 
     viewer_debug(); // デバッグ用関数
@@ -65,7 +72,7 @@ function keys_generation() {
     drums_keyboards.appendChild(drums_flag);
 }
 
-async function UI_prepare() {
+async function top_UI_prepare() {
     // ファイルボタン押下時
     const file_btn = document.getElementById('file_btn');
     const modal_back = document.getElementById('modal_back');
@@ -97,7 +104,7 @@ async function UI_prepare() {
     const drum_data = await drum_load();
     const inst_sel = document.getElementById('inst_sel');
     const inst_opt_flag = document.createDocumentFragment();
-    
+
     inst_data.forEach(inst => {
         const opt = Object.assign(document.createElement('option'), {
             value: inst.num,
@@ -108,7 +115,7 @@ async function UI_prepare() {
     });
 
     inst_sel.appendChild(inst_opt_flag);
-    
+
     // メロディー楽器読み込み
     await Promise.all(inst_data.map(async (inst, i) => {
         const sf = await Soundfont.instrument(audio_context_inst, inst.js);
@@ -232,6 +239,53 @@ async function UI_prepare() {
         key_input.value--;
         key = Number(key_input.value);
     });
+}
+
+function bottom_UI_prepare() {
+    left_bottom_ui_update()
+    // ページテキストボックス変更時処理（規制）
+    const page_input = document.getElementById('page_input');
+
+    page_input.addEventListener('change', () => {
+        const page_min = Number(page_input.min);
+        const page_max = Number(page_input.max);
+        const page_val = Number(page_input.value);
+        if (page_val < page_min) page_input.value = page_min;
+        if (page_val > page_max) page_input.value = page_max;
+        page = Number(page_input.value);
+        // ページ移動ノーツ再描画処理
+    });
+
+    // ページボタンクリック時
+    const page_right = document.getElementById('page_right');
+    const page_left = document.getElementById('page_left');
+
+    page_right.addEventListener('click', () => {
+        const page_max = Number(page_input.max);
+        const page_val = Number(page_input.value);
+        if (page_val >= page_max) return;
+        page_input.value++;
+        page = Number(page_input.value);
+        // ページ移動ノーツ再描画処理
+    });
+
+    page_left.addEventListener('click', () => {
+        const page_min = Number(page_input.min);
+        const page_val = Number(page_input.value);
+        if (page_val <= page_min) return;
+        page_input.value--;
+        page = Number(page_input.value);
+        // ページ移動ノーツ再描画処理
+    });
+}
+
+function left_bottom_ui_update() {
+    const notes_label = document.getElementById('notes_label');
+    const time_label = document.getElementById('time_label');
+    const beats_label = document.getElementById('beats_label');
+    notes_label.textContent = `Notes: ${played_notes} / ${notes}`;
+    time_label.textContent = `Time: ${time}`;
+    beats_label.textContent = `Beats: ${beats}`;
 }
 
 async function inst_load() {
@@ -443,7 +497,7 @@ async function key_click() {
         key.style.backgroundColor = '#555';
         const key_index = Number(key.dataset.key_index);
         if (!current_instrument) return;
-        
+
         current_instrument.play(pitch_data.black[key_index - 1], audio_context_inst.currentTime, {
             gain: vol,
             duration: (60 / tempo) / 2
@@ -536,11 +590,13 @@ function move_notes() {
     const mn_ctx = canvas_move_notes.getContext('2d');
 
     ['mousemove', 'scroll'].forEach(event_type => window.addEventListener(event_type, event => {
-        if (mode != 'create') {
+        const top_ui = document.getElementById('top_ui');
+        const bottom_ui = document.getElementById('bottom_ui');
+        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover')) {
             mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
             return;
         }
-    
+
         const grid_width = canvas_move_notes.getBoundingClientRect().width / 16;    // 1拍分の長さ
         const grid_height = canvas_move_notes.getBoundingClientRect().height / 59;
         const beat = document.getElementById('dur_input').value;
@@ -557,28 +613,32 @@ function move_notes() {
         for (let i = 0; i < bkps.length; i++) Mbkps[i] = Math.abs(mouse_y - bkps[i]);
         for (let i = 0; i < dkps.length; i++) Mdkps[i] = Math.abs(mouse_y - dkps[i]);
         for (let i = 0; i < xps.length; i++) Mxps[i] = Math.abs(mouse_x - xps[i]);
-        
+
         const Mwk_min = Math.min(...Mwkps);
         const Mbk_min = Math.min(...Mbkps);
         const Mdk_min = Math.min(...Mdkps);
         const Mxp_min = Math.min(...Mxps);
-        
+
         x = xps[Mxps.indexOf(Mxp_min)];
         w = grid_width * beat;
-        // waiting_time = (page - 1) * duration * 128 + (Mxps.indexOf(Mxp_min)) * duration;
+        const wait_page_second = 60 / tempo * 16;
+        start = ((page - 1) * wait_page_second) + (Mxps.indexOf(Mxp_min)) * (60 / tempo / 8);   // 設置後、変更時は全体を書きなければならない
 
         if ((Mdk_min < Mwk_min) && (Mdk_min < Mbk_min)) {
             mn_ctx.fillStyle = color + 'aa';
             y = dkps[Mdkps.indexOf(Mdk_min)] - (grid_height / 2);
             h = grid_height;
+            black_notes_judge = false;
         } else if (Mwk_min < Mbk_min) {
             mn_ctx.fillStyle = color + 'aa';
             y = wkps[Mwkps.indexOf(Mwk_min)] - (grid_height / 2);
             h = grid_height;
+            black_notes_judge = false;
         } else {
             mn_ctx.fillStyle = darken_color(color, 34) + 'aa';
             y = bkps[Mbkps.indexOf(Mbk_min)] - (grid_height * 0.6 / 2);
             h = grid_height * 0.6;
+            black_notes_judge = true;
         }
 
         mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
@@ -600,35 +660,90 @@ function darken_color(hex, percent) {
     blue = Math.round(blue * factor);
 
     return (
-        '#' + 
+        '#' +
         red.toString(16).padStart(2, '0') +
         green.toString(16).padStart(2, '0') +
         blue.toString(16).padStart(2, '0')
     );
 }
 
+function edit() {
+    const move_notes = document.getElementById('move_notes');
+    const canvas_put_notes = document.getElementById('put_notes');
+    const pn_ctx = canvas_put_notes.getContext('2d');
+
+    move_notes.addEventListener('click', () => {
+        if (playing == true) return;
+
+        switch (mode) {
+            case 'create':
+                // 保存処理
+                notes_data.push(
+                    {
+                        id: clone,
+                        pos: {
+                            x: x,
+                            y: y,
+                            w: w,
+                            h: h
+                        },
+                        inst: current_instrument.name,
+                        // pitch: pitch,
+                        dur: duration,
+                        start: start,
+                        vol: vol,
+                        color: color,
+                        page: page
+                    }
+                );
+
+                // ノーツ描画処理
+                pn_ctx.fillStyle = black_notes_judge ? darken_color(color, 34) + 'aa' : pn_ctx.fillStyle = color + 'aa';
+                pn_ctx.fillRect(x, y, w, h);
+                clone++;
+                notes++;
+                break;
+            
+            case 'delete':
+                // ノーツ消去処理
+                break;
+
+            case 'select':
+                break;
+
+            case 'lock':
+                return;
+        }
+
+        left_bottom_ui_update()
+        console.log(notes_data);
+    });
+}
+
 function viewer_debug() {
     const debug_text = document.getElementById('debug_text');
 
     setInterval(() => {
-        debug_text.textContent = `mode：${mode}
-            inst：${current_instrument.name}
-            dur：${duration}s
-            vol：${vol}
-            color：${color}
-            BPM：${tempo}
-            key：${key}
-
-            waiting_time：${Number(waiting_time).toFixed(3)}
-
-            page：${page}
-            
-            mouse_x：${Math.round(mouse_x)}
-            mouse_y：${Math.round(mouse_y)}
-            
-            notes_X：${Math.round(x)}
+        debug_text.textContent = `notes_X：${Math.round(x)}
             notes_y：${Math.round(y)}
             notes_width：${Math.round(w)}
-            notes_height：${Math.round(h)}`;
+            notes_height：${Math.round(h)}
+            inst：${current_instrument.name}
+            pitch：${'pitch'}
+            dur：${duration}s
+            start：${Number(start).toFixed(3)}s
+            vol：${vol}
+            color：${color}
+            page：${page}
+
+            tempo：${tempo}
+            key：${key}
+
+            mode：${mode}
+            notes：${notes}
+            clone：${clone}
+            time：${time}
+            mouse_x：${Math.round(mouse_x)}
+            mouse_y：${Math.round(mouse_y)}`;
     }, 1000 / 60);
 }

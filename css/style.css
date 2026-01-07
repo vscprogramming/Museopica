@@ -31,10 +31,8 @@ html, body {
     display: flex;
     align-items: center;
     flex-direction: row;
-    background-color: #141414dd;
+    background-color: #000;
 }
-
-#top_ui { overflow: auto hidden; }
 
 .file_btns {
     width: 60px; height: 34px;
@@ -55,21 +53,22 @@ html, body {
     border-right: 1px solid #eee;
 }
 
-.mode_btns, .ctrl_btns {
+.mode_btns, .ctrl_btns, .page_btn {
     margin: 3px;
     border: none;
+    border-radius: 7px;
     background-color: #000;
     transition: background-color .2s ease;
 }
 
-.mode_btns:hover, .ctrl_btns:hover { background-color: #333; }
+.mode_btns:hover, .ctrl_btns:hover, .page_btn:hover { background-color: #333; }
 
 .mode_btns.selected, .mode_btns.selected:hover,
 .ctrl_btns.selected, .ctrl_btns.selected:hover {
     background-color: #f707;
 }
 
-.file_img, .mode_img, .ctrl_img {
+.file_img, .mode_img, .ctrl_img, .page_btn_img {
     width: 100%; height: 100%;
     pointer-events: none;
 }
@@ -148,7 +147,7 @@ html, body {
     font-size: larger;
 }
 
-#BPM_input, #key_input {
+#BPM_input, #key_input, #page_input {
     width: 3%; height: 70%;
     border: none;
     color: #eee;
@@ -159,7 +158,8 @@ html, body {
 }
 
 #BPM_input::-webkit-inner-spin-button, 
-#key_input::-webkit-inner-spin-button {
+#key_input::-webkit-inner-spin-button,
+#page_input::-webkit-inner-spin-button {
     display: none;
 }
 
@@ -174,13 +174,53 @@ html, body {
 
 .BPM_ctrls, .key_ctrls {
     width: 14px; height: 14px;
+    color: #f70;
     display: flex;
     font-size: larger;
     align-items: center;
     justify-content: center;
 }
 
-#bottom_ui p { color: #eee; }
+#bottom_ui p {
+    width: auto; height: 100%;
+    margin: 0;
+    float: right;
+    display: flex;
+    color: #eee;
+    align-items: flex-end;
+}
+
+#left_bottom_ui, #right_bottom_ui {
+    width: 50%; height: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+#right_bottom_ui {
+    color: #eee;
+}
+
+#pages {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+#page_input {
+    width: 7%;
+}
+
+.left_uis {
+    width: auto; height: 100%;
+    margin-right: 24px;
+}
+
+.left_labels {
+    color: #eee;
+    font-size: 3vh;
+}
 
 #editor {
     top: 0; left: 0;

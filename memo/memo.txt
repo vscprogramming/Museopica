@@ -1,5 +1,7 @@
-waiting_timeはテンポに応じてリアルタイムも保存データも書き換えなければならない
+durとstartはテンポに応じてリアルタイムも保存データも書き換えなければならない
+dur = Number(((60 / tempo) * dur_input.value).toFixed(7));
+start = ((page - 1) * wait_page_second) + (Mxps.indexOf(Mxp_min)) * (60 / tempo / 8);
 
 
-保存に必要なデータ
+保存データを生成するときにidは連番に振りなおし
 
