@@ -22,6 +22,7 @@
         {
             "tempo": "テンポ",
             "key": "キー",
+            "change_time": "画面切り替え時間",
             "reference": "拍子記号分母（基準音符）",
             "measure": "拍子記号分子（音符数）",
             "displayed_measure": "表示小節数"

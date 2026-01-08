@@ -1,16 +1,28 @@
 const audio_context_inst = new AudioContext();
 const audio_context_drum = new AudioContext();
+let pitch_data;
 let inst_id, instruments = [], drums = [];
 let playing = false;
 let mouse_x, mouse_y;
 let black_notes_judge;
-let mode, current_instrument, duration, vol, color, tempo, key;
-let notes = 0, clone = 0, played_notes = 0, time = '0:00:00', hour, minute, second, beats = '4, 4', page = 1;
+let mode, current_instrument, pitch, duration, vol, color, tempo, key;
+let notes = 0, clone = 0, played_notes = 0, time = '0:00:00.000', hour, minute, second, beats = '4, 4', page = 1;
 let start;
-const notes_data = [], save_data = {
+let start_time, elapsed_time;
+
+const notes_data = [], Nplayed = [], save_data = {
     notes: new Array(99998),
-    var: 0.21
+    page_options: {
+        tempo: tempo,
+        key: key,
+        change_time: 0,
+        reference: 4,
+        measure: 4,
+        displayed_measure: 4
+    },
+    var: 0.22
 };
+
 let x, y, w, h;
 const wkps = new Array(50); // white key points（白鍵y座標　配列）
 const Mwkps = new Array(50); // Mouse white key points（白鍵マウス館y座標　配列）
@@ -98,6 +110,29 @@ async function top_UI_prepare() {
     });
 
     // 再生ボタン処理
+    const play_btn = document.getElementById('play_btn');
+    const play_img = document.getElementById('play_img');
+
+    play_btn.addEventListener('click', () => {
+        if (playing == false) {
+            playing = true;
+
+            Object.assign(play_img, {
+                src: 'assets/img/svg/ctrl_stop.svg',
+                alt: 'stop'
+            });
+
+            timer_start();
+            play_music();
+        } else {
+            playing = false;
+
+            Object.assign(play_img, {
+                src: 'assets/img/svg/ctrl_play.svg',
+                alt: 'play'
+            });
+        }
+    });
 
     // 楽器選択プルダウン準備
     const inst_data = await inst_load();
@@ -158,7 +193,7 @@ async function top_UI_prepare() {
         const val_input = val_label / dur_input.max * 100;
         dur_label.textContent = `${val_label}拍`;
         dur_input.style.setProperty('--dur-value', val_input + '%');
-        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(3));
     }
 
     // 音量スライダー変更時処理
@@ -189,7 +224,9 @@ async function top_UI_prepare() {
         if (BPM_val < BPM_min) BPM_input.value = BPM_min;
         if (BPM_val > BPM_max) BPM_input.value = BPM_max;
         tempo = Number(BPM_input.value);
-        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(3));
+        stop_timer_update();
+        left_bottom_ui_update();
     });
 
     // BPMボタンクリック時
@@ -202,7 +239,9 @@ async function top_UI_prepare() {
         if (BPM_val >= BPM_max) return;
         BPM_input.value++;
         tempo = Number(BPM_input.value);
-        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(3));
+        stop_timer_update();
+        left_bottom_ui_update();
     });
 
     BPM_minus.addEventListener('click', () => {
@@ -211,7 +250,9 @@ async function top_UI_prepare() {
         if (BPM_val <= BPM_min) return;
         BPM_input.value--;
         tempo = Number(BPM_input.value);
-        duration = Number(((60 / tempo) * dur_input.value).toFixed(7));
+        duration = Number(((60 / tempo) * dur_input.value).toFixed(3));
+        stop_timer_update();
+        left_bottom_ui_update();
     });
 
     // キーテキストボックス変更時処理（規制）
@@ -241,6 +282,72 @@ async function top_UI_prepare() {
     });
 }
 
+function timer_start() {
+    start_time = performance.now();
+
+    const timer = setInterval(() => {
+        elapsed_time = (((performance.now() - start_time) / 1000) + ((page - 1) * 60 / tempo * 16)).toFixed(3);
+        hour = Math.floor(elapsed_time / 3600);
+        minute = Math.floor(elapsed_time / 60) % 60;
+        second = (elapsed_time % 60).toFixed(3);
+        time = `${hour}:${minute <= 9 ? `0${minute}` : minute}:${second <= 10 ? `0${second}` : second}`;
+        left_bottom_ui_update()
+
+        if (!playing) {
+            clearInterval(timer);
+            stop_timer_update();
+            left_bottom_ui_update();
+            return;
+        }
+    }, 1000 / 60);
+}
+
+function stop_timer_update() {
+    elapsed_time = ((page - 1) * 60 / tempo * 16).toFixed(3);
+    hour = Math.floor(elapsed_time / 3600);
+    minute = Math.floor(elapsed_time / 60) % 60;
+    second = (elapsed_time % 60).toFixed(3);
+    time = `${hour}:${minute <= 9 ? `0${minute}` : minute}:${second <= 10 ? `0${second}` : second}`;
+}
+
+function play_music() {
+    if (!notes_data || !Nplayed || !playing) {
+        clearInterval(music_play_interval);
+        return;
+    }
+    let i = 0;
+    const music_play_interval = setInterval(() => {
+        if (!playing) {
+            for (let i = 0; i > Nplayed.length; i++) {
+                if (notes_data[i] !== null) {
+                    Nplayed[i] = false;
+                }
+            }
+            console.log(Nplayed);
+            clearInterval(music_play_interval);
+            return;
+        }
+
+        if (i >= notes_data.length) i = 0;
+
+        if (notes_data[i].start <= elapsed_time && !Nplayed[i]) {
+            if (String(notes_data[i].pitch).includes('D')) {
+                // ドラム
+            } else {
+                // 白鍵 / 黒鍵
+                notes_data[i].inst.play(Number(notes_data[i].pitch) + key, audio_context_inst.currentTime, {
+                    gain: Number(notes_data[i].vol),
+                    duration: Number(notes_data[i].dur)
+                });
+
+                Nplayed[i] = true;
+            }
+        }
+
+        i++;
+    }, 1000 / 240);
+}
+
 function bottom_UI_prepare() {
     left_bottom_ui_update()
     // ページテキストボックス変更時処理（規制）
@@ -253,6 +360,8 @@ function bottom_UI_prepare() {
         if (page_val < page_min) page_input.value = page_min;
         if (page_val > page_max) page_input.value = page_max;
         page = Number(page_input.value);
+        stop_timer_update();
+        left_bottom_ui_update();
         // ページ移動ノーツ再描画処理
     });
 
@@ -266,6 +375,8 @@ function bottom_UI_prepare() {
         if (page_val >= page_max) return;
         page_input.value++;
         page = Number(page_input.value);
+        stop_timer_update();
+        left_bottom_ui_update();
         // ページ移動ノーツ再描画処理
     });
 
@@ -275,6 +386,8 @@ function bottom_UI_prepare() {
         if (page_val <= page_min) return;
         page_input.value--;
         page = Number(page_input.value);
+        stop_timer_update();
+        left_bottom_ui_update();
         // ページ移動ノーツ再描画処理
     });
 }
@@ -448,7 +561,7 @@ function paint_stage(canvas_grid) {
 }
 
 async function key_click() {
-    const pitch_data = await pitch_load();
+    pitch_data = await pitch_load();
     let click = false;
     document.addEventListener('pointerdown', () => click = true);
     document.addEventListener('pointerup', () => click = false);
@@ -457,13 +570,13 @@ async function key_click() {
     const drums_keyboards = document.getElementById('drums_keyboards');
 
     white_keyboards.addEventListener('pointerdown', event => {
-        const key = event.target.closest('.white_key');
-        if (!key) return;
-        key.style.backgroundColor = '#aaa';
-        const key_index = Number(key.dataset.key_index);
+        const keyboard = event.target.closest('.white_key');
+        if (!keyboard) return;
+        keyboard.style.backgroundColor = '#aaa';
+        const key_index = Number(keyboard.dataset.key_index);
         if (!current_instrument) return;
 
-        current_instrument.play(pitch_data.white[key_index - 1], audio_context_inst.currentTime, {
+        current_instrument.play(pitch_data.white[key_index - 1] + key, audio_context_inst.currentTime, {
             gain: vol,
             duration: (60 / tempo) / 2
         });
@@ -471,13 +584,13 @@ async function key_click() {
 
     white_keyboards.addEventListener('pointerenter', event => {
         if (!click) return;
-        const key = event.target.closest('.white_key');
-        if (!key) return;
-        key.style.backgroundColor = '#aaa';
-        const key_index = Number(key.dataset.key_index);
+        const keyboard = event.target.closest('.white_key');
+        if (!keyboard) return;
+        keyboard.style.backgroundColor = '#aaa';
+        const key_index = Number(keyboard.dataset.key_index);
         if (!current_instrument) return;
 
-        current_instrument.play(pitch_data.white[key_index - 1], audio_context_inst.currentTime, {
+        current_instrument.play(pitch_data.white[key_index - 1] + key, audio_context_inst.currentTime, {
             gain: vol,
             duration: (60 / tempo) / 2
         });
@@ -485,20 +598,20 @@ async function key_click() {
 
     ['pointerup', 'pointerout'].forEach(event => {
         white_keyboards.addEventListener(event, event => {
-            const key = event.target.closest('.white_key');
-            if (!key) return;
-            key.style.backgroundColor = '';
+            const keyboard = event.target.closest('.white_key');
+            if (!keyboard) return;
+            keyboard.style.backgroundColor = '';
         });
     });
 
     black_keyboards.addEventListener('pointerdown', event => {
-        const key = event.target.closest('.black_key');
-        if (!key) return;
-        key.style.backgroundColor = '#555';
-        const key_index = Number(key.dataset.key_index);
+        const keyboard = event.target.closest('.black_key');
+        if (!keyboard) return;
+        keyboard.style.backgroundColor = '#555';
+        const key_index = Number(keyboard.dataset.key_index);
         if (!current_instrument) return;
 
-        current_instrument.play(pitch_data.black[key_index - 1], audio_context_inst.currentTime, {
+        current_instrument.play(pitch_data.black[key_index - 1] + key, audio_context_inst.currentTime, {
             gain: vol,
             duration: (60 / tempo) / 2
         });
@@ -506,13 +619,13 @@ async function key_click() {
 
     black_keyboards.addEventListener('pointerenter', event => {
         if (!click) return;
-        const key = event.target.closest('.black_key');
-        if (!key) return;
-        key.style.backgroundColor = '#555'
-        const key_index = Number(key.dataset.key_index);
+        const keyboard = event.target.closest('.black_key');
+        if (!keyboard) return;
+        keyboard.style.backgroundColor = '#555'
+        const key_index = Number(keyboard.dataset.key_index);
         if (!current_instrument) return;
 
-        current_instrument.play(pitch_data.black[key_index - 1], audio_context_inst.currentTime, {
+        current_instrument.play(pitch_data.black[key_index - 1] + key, audio_context_inst.currentTime, {
             gain: vol,
             duration: (60 / tempo) / 2
         });
@@ -520,9 +633,9 @@ async function key_click() {
 
     ['pointerup', 'pointerout'].forEach(event => {
         black_keyboards.addEventListener(event, event => {
-            const key = event.target.closest('.black_key');
-            if (!key) return;
-            key.style.backgroundColor = '';
+            const keyboard = event.target.closest('.black_key');
+            if (!keyboard) return;
+            keyboard.style.backgroundColor = '';
         });
     });
 
@@ -592,7 +705,7 @@ function move_notes() {
     ['mousemove', 'scroll'].forEach(event_type => window.addEventListener(event_type, event => {
         const top_ui = document.getElementById('top_ui');
         const bottom_ui = document.getElementById('bottom_ui');
-        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover')) {
+        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover') || playing) {
             mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
             return;
         }
@@ -629,16 +742,19 @@ function move_notes() {
             y = dkps[Mdkps.indexOf(Mdk_min)] - (grid_height / 2);
             h = grid_height;
             black_notes_judge = false;
+            pitch = `D${pitch_data.drum[Mdkps.indexOf(Mdk_min)]}`;
         } else if (Mwk_min < Mbk_min) {
             mn_ctx.fillStyle = color + 'aa';
             y = wkps[Mwkps.indexOf(Mwk_min)] - (grid_height / 2);
             h = grid_height;
             black_notes_judge = false;
+            pitch = pitch_data.white[Mwkps.indexOf(Mwk_min)] + key;
         } else {
             mn_ctx.fillStyle = darken_color(color, 34) + 'aa';
             y = bkps[Mbkps.indexOf(Mbk_min)] - (grid_height * 0.6 / 2);
             h = grid_height * 0.6;
             black_notes_judge = true;
+            pitch = pitch_data.black[Mbkps.indexOf(Mbk_min)] + key;
         }
 
         mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
@@ -687,15 +803,17 @@ function edit() {
                             w: w,
                             h: h
                         },
-                        inst: current_instrument.name,
-                        // pitch: pitch,
+                        inst: current_instrument,
+                        pitch: pitch,
                         dur: duration,
                         start: start,
                         vol: vol,
                         color: color,
-                        page: page
+                        page: page,
                     }
                 );
+
+                Nplayed.push(false);
 
                 // ノーツ描画処理
                 pn_ctx.fillStyle = black_notes_judge ? darken_color(color, 34) + 'aa' : pn_ctx.fillStyle = color + 'aa';
@@ -703,7 +821,7 @@ function edit() {
                 clone++;
                 notes++;
                 break;
-            
+
             case 'delete':
                 // ノーツ消去処理
                 break;
@@ -729,7 +847,7 @@ function viewer_debug() {
             notes_width：${Math.round(w)}
             notes_height：${Math.round(h)}
             inst：${current_instrument.name}
-            pitch：${'pitch'}
+            pitch：${pitch}
             dur：${duration}s
             start：${Number(start).toFixed(3)}s
             vol：${vol}
@@ -740,10 +858,14 @@ function viewer_debug() {
             key：${key}
 
             mode：${mode}
+            playing：${playing}
             notes：${notes}
             clone：${clone}
-            time：${time}
             mouse_x：${Math.round(mouse_x)}
-            mouse_y：${Math.round(mouse_y)}`;
+            mouse_y：${Math.round(mouse_y)}
+            
+            start_time：${start_time}
+            elapsed_time：${elapsed_time}
+            time：${time}`;
     }, 1000 / 60);
 }

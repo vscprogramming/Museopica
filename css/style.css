@@ -406,6 +406,11 @@ html, body {
     background-color: #003;
 }
 
+#debug_area {
+    width: 100%; height: 90%;
+    margin: 0;
+}
+
 #debug_area h3, #debug_text {
     margin: 0;
     padding: 0;
