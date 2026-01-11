@@ -1,7 +1,10 @@
-durとstartはテンポに応じてリアルタイムも保存データも書き換えなければならない
-dur = Number(((60 / tempo) * dur_input.value).toFixed(7));
-start = ((page - 1) * wait_page_second) + (Mxps.indexOf(Mxp_min)) * (60 / tempo / 8);
+ページ移動時だけでなく、resize時も再描画対象
 
+ノーツ削除
+まず当たり判定が必要、
+当たり判定かつclickされたときに
+cleatRect、notes_data（id一致箇所）を'deleted'に変更
 
 保存データを生成するときにidは連番に振りなおし
+
 
