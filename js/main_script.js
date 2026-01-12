@@ -20,11 +20,6 @@ const page_options = Array.from({ length: 100 }, () => ({
     displayed_measure: 4
 }));
 const Pchanged = new Array(page_options.length).fill(false);
-const save_data = {
-    notes: new Array(99999),
-    page_options: new Array(100),
-    var: 0.23
-};
 tempo_change();
 
 let x, y, w, h;
@@ -100,6 +95,38 @@ async function top_UI_prepare() {
 
     modal_back.addEventListener('click', () => modal_back.classList.remove('show'));
 
+    // 保存ボタン押下時
+    const save_opt = document.getElementById('save_opt');
+
+    save_opt.addEventListener('click', () => {
+        const save_data = {
+            notes: [],
+            page_options: [],
+            var: document.getElementById('ver').textContent.replace('v', '')
+        };
+
+        notes_data.forEach((notes, i) => {
+            if (notes === 'deleted') return;
+            save_data.notes[i] = notes;
+            save_data.notes[i].id = i;
+        });
+
+        page_options.forEach(page => save_data.page_options.push(page));
+        console.log(save_data);
+
+        const save_data_json = JSON.stringify(save_data, null, 2);
+        const save_data_blob = new Blob([save_data_json], { type: 'application/json' });
+        const save_data_URL = URL.createObjectURL(save_data_blob);
+
+        const a = Object.assign(document.createElement('a'), {
+            href: save_data_URL,
+            download: `${prompt('ファイル名を入力してください。')}.json`
+        });
+
+        a.click();
+        URL.revokeObjectURL(save_data_URL);
+    });
+
     // モード切替ボタン処理
     mode = 'lock';
     document.getElementById('lock_btn').classList.add('selected');
@@ -108,7 +135,7 @@ async function top_UI_prepare() {
         if (event.target.tagName === 'BUTTON') {
             if (mode == event.target.dataset.mode) return;
             mode = event.target.dataset.mode;
-            document.querySelectorAll('#mode_btns button').forEach(btn => { btn.classList.remove('selected') });
+            document.querySelectorAll('#mode_btns button').forEach(btn => btn.classList.remove('selected'));
             event.target.classList.add('selected');
         }
     });
@@ -136,6 +163,22 @@ async function top_UI_prepare() {
                 alt: 'play'
             });
         }
+    });
+
+    // スキップボタン処理
+    const skip_btn = document.getElementById('skip_btn');
+
+    skip_btn.addEventListener('click', () => {
+        playing = false;
+
+        Object.assign(play_img, {
+            src: 'assets/img/svg/ctrl_play.svg',
+            alt: 'play'
+        });
+
+        page = 1;
+        document.getElementById('page_input').value = page;
+        left_bottom_ui_update();
     });
 
     // 楽器選択プルダウン準備
@@ -220,7 +263,11 @@ async function top_UI_prepare() {
 
     // BPMテキストボックス変更時処理（規制）
     BPM_input.addEventListener('change', () => {
-        if (playing) return;
+        if (playing) {
+            BPM_input.value = tempo;
+            return;
+        }
+
         const BPM_min = Number(BPM_input.min);
         const BPM_max = Number(BPM_input.max);
         const BPM_val = Number(BPM_input.value);
@@ -240,7 +287,12 @@ async function top_UI_prepare() {
     BPM_plus.addEventListener('click', () => {
         const BPM_max = Number(BPM_input.max);
         const BPM_val = Number(BPM_input.value);
-        if (BPM_val >= BPM_max || playing) return;
+
+        if (BPM_val >= BPM_max || playing) {
+            BPM_input.value = tempo;
+            return;
+        }
+
         BPM_input.value++;
         tempo = Number(BPM_input.value);
         duration = Number(((60 / tempo) * dur_input.value).toFixed(3));
@@ -252,7 +304,12 @@ async function top_UI_prepare() {
     BPM_minus.addEventListener('click', () => {
         const BPM_min = Number(BPM_input.min);
         const BPM_val = Number(BPM_input.value);
-        if (BPM_val <= BPM_min || playing) return;
+
+        if (BPM_val <= BPM_min || playing) {
+            BPM_input.value = tempo;
+            return;
+        }
+
         BPM_input.value--;
         tempo = Number(BPM_input.value);
         duration = Number(((60 / tempo) * dur_input.value).toFixed(3));
@@ -291,73 +348,77 @@ async function top_UI_prepare() {
 function timer_start() {
     start_time_bar = performance.now();
     start_time = performance.now();
+    let time_loop = null;
 
-    const timer = setInterval(() => {
+    function timer_loop() {
         elapsed_time_bar = (performance.now() - start_time_bar) / 1000;
         elapsed_time = (elapsed_time_bar + ((page - 1) * 60 / tempo * 16)).toFixed(3);
         hour = Math.floor(elapsed_time / 3600);
         minute = Math.floor(elapsed_time / 60) % 60;
         second = (elapsed_time % 60).toFixed(3);
         time = `${hour}:${minute <= 9 ? `0${minute}` : minute}:${second <= 10 ? `0${second}` : second}`;
-        left_bottom_ui_update()
+        left_bottom_ui_update();
 
         if (!playing) {
-            clearInterval(timer);
+            cancelAnimationFrame(time_loop);
             elapsed_time = 0, elapsed_time_bar = 0;
             time = '0:00:00.000';
             left_bottom_ui_update();
             return;
         }
-    }, 1000 / 60);
+
+        time_loop = requestAnimationFrame(timer_loop);
+    }
+
+    time_loop = requestAnimationFrame(timer_loop);
 }
 
 function play_music() {
     // 演奏前判断（再生中か、notes_dataが空配列またはすべてdeletedか）
     move_bar();
     if (notes_data.every(v => v === 'deleted' || v == null)) return;
+    let music_play_loop = null;
 
-    const music_play_interval = setInterval(() => {
+    function play_loop() {
         if (!playing) {
-            for (let c = 0; c < Nplayed.length; c++) {
-                if (notes_data[c] !== 'deleted' && notes_data[c] !== null) {
-                    Nplayed[c] = false;
-                }
-            }
-
+            for (let c = 0; c < Nplayed.length; c++) if (notes_data[c] !== 'deleted' && notes_data[c] !== null) Nplayed[c] = false;
             played_notes = Nplayed.filter(v => v === true).length;
-            clearInterval(music_play_interval);
+            cancelAnimationFrame(music_play_loop);
             return;
         }
 
         for (let i = 0; i < notes_data.length; i++) {
             if (notes_data[i].start <= elapsed_time && !Nplayed[i] && notes_data[i].page == page) {
-                if (String(notes_data[i].pitch).includes('D')) {
+                if (notes_data[i].key_type == 'D') {
                     // ドラム
-                    // console.log('drum played');
+                    play_drum(drums[notes_data[i].pitch - 1], notes_data[i].vol);
                 } else {
                     // 白鍵 / 黒鍵
                     notes_data[i].inst.play(Number(notes_data[i].pitch) + key, audio_context_inst.currentTime, {
                         gain: Number(notes_data[i].vol),
                         duration: Number(notes_data[i].dur)
                     });
-
-                    Nplayed[i] = true;
-                    // console.log('played');
                 }
+
+                Nplayed[i] = true;
             }
         }
 
         played_notes = Nplayed.filter(v => v === true).length;
-    }, 1000 / 240);
+        music_play_loop = requestAnimationFrame(play_loop);
+    }
+
+    music_play_loop = requestAnimationFrame(play_loop);
 }
 
 function move_bar() {
     const page_input = document.getElementById('page_input');
+    let music_play_loop = null;
 
-    const music_play_interval = setInterval(() => {
+    function play_loop() {
         if (!playing) {
             for (let c = 0; c < Pchanged.length; c++) Pchanged[c] = false;
-            clearInterval(music_play_interval);
+            cancelAnimationFrame(music_play_loop);
             return;
         }
 
@@ -366,19 +427,23 @@ function move_bar() {
                 playing = false;
                 return;
             }
+
             start_time_bar = performance.now();
             Pchanged[page - 1] = true;
             page_input.value++;
             page = Number(page_input.value);
             left_bottom_ui_update();
-            paint_notes_again();
         }
-    }, 1000 / 60);
+
+        music_play_loop = requestAnimationFrame(play_loop);
+    }
+
+    music_play_loop = requestAnimationFrame(play_loop);
 }
 
 function notes_data_update_tempo() {
     for (let i = 0; i < notes_data.length; i++) {
-        if (notes_data[i] == 'deleted' || notes_data[i] == null) return;
+        if (notes_data[i] == 'deleted' || notes_data[i] == null) continue;
         notes_data[i].dur = Number(((60 / tempo) * notes_data[i].crap).toFixed(3));
         const wait_page_second = 60 / tempo * 16;
         notes_data[i].start = ((notes_data[i].page - 1) * wait_page_second) + (xps.indexOf(Number(notes_data[i].pos.x))) * (60 / tempo / 8);
@@ -407,7 +472,6 @@ function bottom_UI_prepare() {
         page = Number(page_input.value);
 
         left_bottom_ui_update();
-        paint_notes_again();
     });
 
     // ページボタンクリック時
@@ -422,7 +486,6 @@ function bottom_UI_prepare() {
         page = Number(page_input.value);
 
         left_bottom_ui_update();
-        paint_notes_again();
     });
 
     page_left.addEventListener('click', () => {
@@ -433,11 +496,11 @@ function bottom_UI_prepare() {
         page = Number(page_input.value);
 
         left_bottom_ui_update();
-        paint_notes_again();
     });
 }
 
 function left_bottom_ui_update() {
+    notes = notes_data.filter(v => v !== 'deleted').length;
     const notes_label = document.getElementById('notes_label');
     const time_label = document.getElementById('time_label');
     // const beats_label = document.getElementById('beats_label');
@@ -453,9 +516,19 @@ function paint_notes_again() {
     if (notes_data.every(v => v === 'deleted' || v == null)) return;
 
     notes_data.forEach(notes => {
+        if (notes == 'deleted') return;
+        let notes_x = notes.pos.x;
+        let notes_y = notes.pos.y;
+        let notes_w = notes.pos.w;
+        let notes_h = notes.pos.h;
+
         if (notes.page == page) {
-            pn_ctx.fillStyle = notes.notes_type == 'B' ? darken_color(notes.color, 34) + 'aa' : notes.color + 'aa';
-            pn_ctx.fillRect(notes.pos.x, notes.pos.y, notes.pos.w, notes.pos.h);
+            if (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h) {
+                pn_ctx.fillStyle = notes.notes_type == 'B' ? `#${lighten_color(darken_color(notes.color.replace(/^#/, '').replace(/^#/, ''), 34), 34)}aa` : `#${lighten_color(notes.color.replace(/^#/, ''), 34)}aa`;
+            } else {
+                pn_ctx.fillStyle = notes.notes_type == 'B' ? `#${darken_color(notes.color.replace(/^#/, ''), 34)}aa` : `#${notes.color.replace(/^#/, '')}aa`;
+            }
+            pn_ctx.fillRect(notes_x, notes_y, notes_w, notes_h);
         }
     });
 }
@@ -538,21 +611,29 @@ async function editor_grid_prepare() {
     const canvas_put_notes = document.getElementById('put_notes');
     const canvas_move_notes = document.getElementById('move_notes');
     const div_modal_back = document.getElementById('modal_back');
-    resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back);
+    const canvas_move_bar = document.getElementById('move_bar');
+    resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back, canvas_move_bar);
     paint_stage(canvas_grid);
 
     window.addEventListener('resize', () => {
-        resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back);
+        resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back, canvas_move_bar);
         paint_stage(canvas_grid);
     });
+
+    function paint_notes_loop() {
+        paint_notes_again();
+        requestAnimationFrame(paint_notes_loop);
+    }
+
+    paint_notes_loop();
 }
 
-function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back) {
+function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back, canvas_move_bar) {
     const div_canvas = document.getElementById('canvas').getBoundingClientRect();
     const white_keyboards = document.getElementById('white_keyboards').getBoundingClientRect();
     const drums_keyboards = document.getElementById('drums_keyboards').getBoundingClientRect();
 
-    [canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back].forEach(canvas => {
+    [canvas_grid, canvas_put_notes, canvas_move_notes, div_modal_back, canvas_move_bar].forEach(canvas => {
         Object.assign(canvas, {
             width: div_canvas.width - 7,
             height: white_keyboards.height + drums_keyboards.height
@@ -565,9 +646,9 @@ function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_moda
     black_keys.forEach((key, i) => bkps[i] = key.offsetTop + key.offsetHeight / 2);
     const drums_keys = document.querySelectorAll('#drums_keyboards .drum_key');
     drums_keys.forEach((key, i) => dkps[i] = (key.offsetTop + key.offsetHeight / 2) + white_keyboards.height);
-
     const grid_width_half = canvas_grid.getBoundingClientRect().width / 128;
     let gwf = 0;
+
     for (let i = 0; i < xps.length; i++) {
         xps[i] = gwf;
         gwf += grid_width_half;
@@ -703,7 +784,7 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#aaa';
         const key_index = Number(key.dataset.key_index);
-        play_drum(drums[key_index - 1]);
+        play_drum(drums[key_index - 1], vol);
     });
 
     drums_keyboards.addEventListener('pointerenter', event => {
@@ -712,7 +793,7 @@ async function key_click() {
         if (!key) return;
         key.style.backgroundColor = '#aaa';
         const key_index = Number(key.dataset.key_index);
-        play_drum(drums[key_index - 1]);
+        play_drum(drums[key_index - 1], vol);
     }, true);
 
     ['pointerup', 'pointerout'].forEach(event => {
@@ -724,10 +805,19 @@ async function key_click() {
     });
 }
 
-function play_drum(drum) {
+function play_drum(drum, Dvol) {
+    let v = Number(Dvol);
+    if (Number.isNaN(v)) v = 7; // デフォルト
+    v = Math.max(0, Math.min(14, v));
+    let gainValue;
+    if (v <= 7) gainValue = v / 7;
+    else gainValue = 1 + (v - 7) / 7;
     const source = audio_context_drum.createBufferSource();
     source.buffer = drum;
-    source.connect(audio_context_drum.destination);
+    const gainNode = audio_context_drum.createGain();
+    gainNode.gain.value = gainValue;
+    source.connect(gainNode);
+    gainNode.connect(audio_context_drum.destination);
     source.start();
 }
 
@@ -764,18 +854,17 @@ function move_notes() {
     ['mousemove', 'scroll'].forEach(event_type => window.addEventListener(event_type, event => {
         const top_ui = document.getElementById('top_ui');
         const bottom_ui = document.getElementById('bottom_ui');
-
-        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover') || playing) {
-            mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
-            return;
-        }
-
         const grid_width = canvas_move_notes.getBoundingClientRect().width / 16;    // 1拍分の長さ
         const grid_height = canvas_move_notes.getBoundingClientRect().height / 59;
         const beat = document.getElementById('dur_input').value;
         const canvas_rect = canvas_move_notes.getBoundingClientRect();
         mouse_x = event.clientX - canvas_rect.left;
         mouse_y = event.clientY - canvas_rect.top;
+
+        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover') || playing) {
+            mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
+            return;
+        }
 
         if (mouse_x <= 0 || mouse_y <= 0) {
             mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
@@ -797,23 +886,23 @@ function move_notes() {
         start = ((page - 1) * wait_page_second) + (Mxps.indexOf(Mxp_min)) * (60 / tempo / 8);
 
         if ((Mdk_min < Mwk_min) && (Mdk_min < Mbk_min)) {
-            mn_ctx.fillStyle = color + 'aa';
+            mn_ctx.fillStyle = `#${color.replace(/^#/, '')}aa`;
             y = dkps[Mdkps.indexOf(Mdk_min)] - (grid_height / 2);
             h = grid_height;
             key_type = 'D';
             pitch = pitch_data.drum[Mdkps.indexOf(Mdk_min)];
         } else if (Mwk_min < Mbk_min) {
-            mn_ctx.fillStyle = color + 'aa';
+            mn_ctx.fillStyle = `#${color.replace(/^#/, '')}aa`;
             y = wkps[Mwkps.indexOf(Mwk_min)] - (grid_height / 2);
             h = grid_height;
             key_type = 'W';
-            pitch = pitch_data.white[Mwkps.indexOf(Mwk_min)] + key;
+            pitch = pitch_data.white[Mwkps.indexOf(Mwk_min)];
         } else {
-            mn_ctx.fillStyle = darken_color(color, 34) + 'aa';
+            mn_ctx.fillStyle = `#${darken_color(color.replace(/^#/, ''), 34)}aa`;
             y = bkps[Mbkps.indexOf(Mbk_min)] - (grid_height * 0.6 / 2);
             h = grid_height * 0.6;
             key_type = 'B';
-            pitch = pitch_data.black[Mbkps.indexOf(Mbk_min)] + key;
+            pitch = pitch_data.black[Mbkps.indexOf(Mbk_min)];
         }
 
         mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
@@ -822,7 +911,6 @@ function move_notes() {
 }
 
 function darken_color(hex, percent) {
-    hex = hex.replace('#', '');
     let red = parseInt(hex.slice(0, 2), 16);
     let green = parseInt(hex.slice(2, 4), 16);
     let blue = parseInt(hex.slice(4, 6), 16);
@@ -830,19 +918,30 @@ function darken_color(hex, percent) {
     red = Math.round(red * factor);
     green = Math.round(green * factor);
     blue = Math.round(blue * factor);
+    red = Math.max(0, Math.min(255, red));
+    green = Math.max(0, Math.min(255, green));
+    blue = Math.max(0, Math.min(255, blue));
+    let r_value = `${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}${blue.toString(16).padStart(2, '0')}`;
+    return (r_value);
+}
 
-    return (
-        '#' +
-        red.toString(16).padStart(2, '0') +
-        green.toString(16).padStart(2, '0') +
-        blue.toString(16).padStart(2, '0')
-    );
+function lighten_color(hex, percent) {
+    let red = parseInt(hex.slice(0, 2), 16);
+    let green = parseInt(hex.slice(2, 4), 16);
+    let blue = parseInt(hex.slice(4, 6), 16);
+    const factor = 1 + percent / 100;
+    red = Math.round(red * factor);
+    green = Math.round(green * factor);
+    blue = Math.round(blue * factor);
+    red = Math.max(0, Math.min(255, red));
+    green = Math.max(0, Math.min(255, green));
+    blue = Math.max(0, Math.min(255, blue));
+    let r_value = `${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}${blue.toString(16).padStart(2, '0')}`;
+    return (r_value);
 }
 
 function edit() {
     const move_notes = document.getElementById('move_notes');
-    const canvas_put_notes = document.getElementById('put_notes');
-    const pn_ctx = canvas_put_notes.getContext('2d');
 
     move_notes.addEventListener('click', () => {
         if (playing) return;
@@ -873,16 +972,29 @@ function edit() {
                 );
 
                 Nplayed.push(false);
-
-                // ノーツ描画処理
-                pn_ctx.fillStyle = key_type == 'B' ? darken_color(color, 34) + 'aa' : color + 'aa';
-                pn_ctx.fillRect(x, y, w, h);
                 clone++;
-                notes++;
+                left_bottom_ui_update();
+                console.log(notes_data);
                 break;
 
             case 'delete':
                 // ノーツ消去処理
+
+                notes_data.forEach(notes => {
+                    if (notes == 'deleted') return;
+
+                    let notes_x = notes.pos.x;
+                    let notes_y = notes.pos.y;
+                    let notes_w = notes.pos.w;
+                    let notes_h = notes.pos.h;
+
+                    if (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h && notes.page == page) {
+                        notes_data[Number(notes.id)] = 'deleted';
+                        console.log(notes_data);
+                    }
+                });
+
+                left_bottom_ui_update();
                 break;
 
             case 'select':
@@ -891,9 +1003,6 @@ function edit() {
             case 'lock':
                 return;
         }
-
-        left_bottom_ui_update();
-        console.log(notes_data);
     });
 }
 
@@ -901,10 +1010,12 @@ function viewer_debug() {
     const debug_text = document.getElementById('debug_text');
 
     setInterval(() => {
-        debug_text.textContent = `notes_X：${Math.round(x)}
+        debug_text.textContent = `【notes_data】
+            id：${clone}
+            notes_x：${Math.round(x)}
             notes_y：${Math.round(y)}
-            notes_width：${Math.round(w)}
-            notes_height：${Math.round(h)}
+            notes_w：${Math.round(w)}
+            notes_h：${Math.round(h)}
             inst：${current_instrument.name}
             key_type：${key_type}
             pitch：${pitch}
@@ -913,18 +1024,25 @@ function viewer_debug() {
             start：${Number(start).toFixed(3)}s
             vol：${vol}
             color：${color}
-            page：${page}/
-            tempo：${tempo}
-            key：${key}/
+            page：${page}
+            layer：${layer}
+
+            【page_option】
+            BPM：${tempo}
+            key：${key}
+            ctime：${page_options[page - 1].change_time.toFixed(3)}
+
+            【UI_info】
             mode：${mode}
             playing：${playing}
+
+            mouse_x：${Math.round(mouse_x)}
+            mouse_y：${Math.round(mouse_y)}
+
             notes：${notes}
             clone：${clone}
-            mouse_x：${Math.round(mouse_x)}
-            mouse_y：${Math.round(mouse_y)}/
             stime：${Number(start_time).toFixed(3)}, ${Number(start_time_bar).toFixed(3)}
             etime：${Number(elapsed_time).toFixed(3)}, ${Number(elapsed_time_bar).toFixed(3)}
-            ctime：${page_options[page - 1].change_time.toFixed(3)}
             time：${time}`;
-    }, 1000 / 60);
+    }, 100);
 }
