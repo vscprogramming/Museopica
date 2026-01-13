@@ -346,6 +346,12 @@ html, body {
     background-color: #0000;
 }
 
+#move_bar {
+    z-index: 4;
+    pointer-events: none;
+    background-color: #0000;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }

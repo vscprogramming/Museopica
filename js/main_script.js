@@ -3,12 +3,11 @@ const audio_context_drum = new AudioContext();
 let pitch_data;
 let inst_id, instruments = [], drums = [];
 let playing = false;
-let mouse_x, mouse_y;
+let mouse_x, mouse_y, bar_x;
 let mode, current_instrument, key_type, pitch, crap, duration, vol, color, tempo = 100, key;
 let notes = 0, clone = 0, played_notes = 0, time = '0:00:00.000', hour, minute, second, page = 1, layer = 1;
 let start;
 let start_time_bar, start_time, elapsed_time_bar, elapsed_time;
-
 const notes_data = [];
 const Nplayed = [];
 const page_options = Array.from({ length: 100 }, () => ({
@@ -21,7 +20,6 @@ const page_options = Array.from({ length: 100 }, () => ({
 }));
 const Pchanged = new Array(page_options.length).fill(false);
 tempo_change();
-
 let x, y, w, h;
 const wkps = new Array(50); // white key points（白鍵y座標　配列）
 const Mwkps = new Array(50); // Mouse white key points（白鍵マウス館y座標　配列）
@@ -413,14 +411,32 @@ function play_music() {
 
 function move_bar() {
     const page_input = document.getElementById('page_input');
+    const canvas_move_bar = document.getElementById('move_bar');
+    const move_bar_GBCR = canvas_move_bar.getBoundingClientRect();
+    const mb_ctx = canvas_move_bar.getContext('2d');
     let music_play_loop = null;
 
     function play_loop() {
         if (!playing) {
             for (let c = 0; c < Pchanged.length; c++) Pchanged[c] = false;
+            bar_x = 0;
+            mb_ctx.clearRect(0, 0, move_bar_GBCR.width, move_bar_GBCR.height);
             cancelAnimationFrame(music_play_loop);
             return;
         }
+
+        mb_ctx.clearRect(0, 0, move_bar_GBCR.width, move_bar_GBCR.height);
+        bar_x = Number(move_bar_GBCR.width) * (Number(elapsed_time_bar) / Number(page_options[page - 1].change_time));
+
+        Object.assign(mb_ctx, {
+            strokeStyle: '#f70',
+            lineWidth: 5
+        });
+
+        mb_ctx.beginPath();
+        mb_ctx.moveTo(bar_x, 0);
+        mb_ctx.lineTo(bar_x, move_bar_GBCR.height);
+        mb_ctx.stroke();
 
         if (page_options[page - 1].change_time < Number(elapsed_time_bar) && !Pchanged[page - 1]) {
             if (page == 100) {
@@ -523,7 +539,10 @@ function paint_notes_again() {
         let notes_h = notes.pos.h;
 
         if (notes.page == page) {
-            if (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h) {
+            if (
+                (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h) || 
+                (bar_x >= notes_x && bar_x <= notes_x + notes_w)
+            ) {
                 pn_ctx.fillStyle = notes.notes_type == 'B' ? `#${lighten_color(darken_color(notes.color.replace(/^#/, '').replace(/^#/, ''), 34), 34)}aa` : `#${lighten_color(notes.color.replace(/^#/, ''), 34)}aa`;
             } else {
                 pn_ctx.fillStyle = notes.notes_type == 'B' ? `#${darken_color(notes.color.replace(/^#/, ''), 34)}aa` : `#${notes.color.replace(/^#/, '')}aa`;
@@ -1031,6 +1050,9 @@ function viewer_debug() {
             BPM：${tempo}
             key：${key}
             ctime：${page_options[page - 1].change_time.toFixed(3)}
+
+            【notes_bar】
+            bar_x：${Number(bar_x).toFixed(3)}
 
             【UI_info】
             mode：${mode}
