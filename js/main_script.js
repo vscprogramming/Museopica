@@ -10,6 +10,7 @@ let start;
 let start_time_bar, start_time, elapsed_time_bar, elapsed_time;
 const notes_data = [];
 const Nplayed = [];
+
 const page_options = Array.from({ length: 100 }, () => ({
     tempo: 100,
     key: 0,
@@ -18,6 +19,7 @@ const page_options = Array.from({ length: 100 }, () => ({
     measure: 4,
     displayed_measure: 4
 }));
+
 const Pchanged = new Array(page_options.length).fill(false);
 tempo_change();
 let x, y, w, h;
@@ -42,8 +44,9 @@ async function main() {
     await move_notes();
     await edit();
     document.getElementById('loading').style.display = 'none';
-
-    viewer_debug(); // デバッグ用関数
+    
+    // デバッグ用関数
+    viewer_debug();
 }
 
 function keys_generation() {
@@ -111,7 +114,6 @@ async function top_UI_prepare() {
 
         page_options.forEach(page => save_data.page_options.push(page));
         console.log(save_data);
-
         const save_data_json = JSON.stringify(save_data, null, 2);
         const save_data_blob = new Blob([save_data_json], { type: 'application/json' });
         const save_data_URL = URL.createObjectURL(save_data_blob);
@@ -232,7 +234,7 @@ async function top_UI_prepare() {
     dur_update_slider_property();
 
     function dur_update_slider_property() {
-        const val_label = dur_input.value
+        const val_label = dur_input.value;
         const val_input = val_label / dur_input.max * 100;
         dur_label.textContent = `${val_label}拍`;
         dur_input.style.setProperty('--dur-value', val_input + '%');
@@ -471,7 +473,7 @@ function tempo_change() {
 }
 
 function bottom_UI_prepare() {
-    left_bottom_ui_update()
+    left_bottom_ui_update();
     // ページテキストボックス変更時処理（規制）
     const page_input = document.getElementById('page_input');
 
@@ -480,13 +482,13 @@ function bottom_UI_prepare() {
             page_input.value = page;
             return;
         }
+
         const page_min = Number(page_input.min);
         const page_max = Number(page_input.max);
         const page_val = Number(page_input.value);
         if (page_val < page_min) page_input.value = page_min;
         if (page_val > page_max) page_input.value = page_max;
         page = Number(page_input.value);
-
         left_bottom_ui_update();
     });
 
@@ -500,7 +502,6 @@ function bottom_UI_prepare() {
         if (page_val >= page_max || playing) return;
         page_input.value++;
         page = Number(page_input.value);
-
         left_bottom_ui_update();
     });
 
@@ -510,7 +511,6 @@ function bottom_UI_prepare() {
         if (page_val <= page_min || playing) return;
         page_input.value--;
         page = Number(page_input.value);
-
         left_bottom_ui_update();
     });
 }
@@ -607,7 +607,6 @@ async function drum_load() {
 function scroll_syncing() {
     const keyboards = document.getElementById('keyboards');
     const canvas = document.getElementById('canvas');
-
     let syncing = false;
 
     keyboards.addEventListener('scroll', () => {
@@ -755,8 +754,8 @@ async function key_click() {
         });
     }, true);
 
-    ['pointerup', 'pointerout'].forEach(event => {
-        white_keyboards.addEventListener(event, event => {
+    ['pointerup', 'pointerout'].forEach(event_type => {
+        white_keyboards.addEventListener(event_type, event => {
             const keyboard = event.target.closest('.white_key');
             if (!keyboard) return;
             keyboard.style.backgroundColor = '';
@@ -790,8 +789,8 @@ async function key_click() {
         });
     }, true);
 
-    ['pointerup', 'pointerout'].forEach(event => {
-        black_keyboards.addEventListener(event, event => {
+    ['pointerup', 'pointerout'].forEach(event_type => {
+        black_keyboards.addEventListener(event_type, event => {
             const keyboard = event.target.closest('.black_key');
             if (!keyboard) return;
             keyboard.style.backgroundColor = '';
@@ -815,8 +814,8 @@ async function key_click() {
         play_drum(drums[key_index - 1], vol);
     }, true);
 
-    ['pointerup', 'pointerout'].forEach(event => {
-        drums_keyboards.addEventListener(event, event => {
+    ['pointerup', 'pointerout'].forEach(event_type => {
+        drums_keyboards.addEventListener(event_type, event => {
             const key = event.target.closest('.drum_key');
             if (!key) return;
             key.style.backgroundColor = '';
@@ -826,7 +825,7 @@ async function key_click() {
 
 function play_drum(drum, Dvol) {
     let v = Number(Dvol);
-    if (Number.isNaN(v)) v = 7; // デフォルト
+    if (Number.isNaN(v)) v = 7;
     v = Math.max(0, Math.min(14, v));
     let gainValue;
     if (v <= 7) gainValue = v / 7;
@@ -968,27 +967,25 @@ function edit() {
         switch (mode) {
             case 'create':
                 // 保存処理
-                notes_data.push(
-                    {
-                        id: clone,
-                        pos: {
-                            x: x,
-                            y: y,
-                            w: w,
-                            h: h
-                        },
-                        inst: current_instrument,
-                        key_type: key_type,
-                        pitch: pitch,
-                        dur: duration,
-                        crap: crap,
-                        start: start,
-                        vol: vol,
-                        color: color,
-                        page: page,
-                        layer: layer
-                    }
-                );
+                notes_data.push({
+                    id: clone,
+                    pos: {
+                        x: x,
+                        y: y,
+                        w: w,
+                        h: h
+                    },
+                    inst: current_instrument,
+                    key_type: key_type,
+                    pitch: pitch,
+                    dur: duration,
+                    crap: crap,
+                    start: start,
+                    vol: vol,
+                    color: color,
+                    page: page,
+                    layer: layer
+                });
 
                 Nplayed.push(false);
                 clone++;
@@ -1001,7 +998,6 @@ function edit() {
 
                 notes_data.forEach(notes => {
                     if (notes == 'deleted') return;
-
                     let notes_x = notes.pos.x;
                     let notes_y = notes.pos.y;
                     let notes_w = notes.pos.w;
