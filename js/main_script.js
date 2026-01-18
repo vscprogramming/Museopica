@@ -23,6 +23,7 @@ const page_options = Array.from({ length: 100 }, () => ({
 const Pchanged = new Array(page_options.length).fill(false);
 tempo_change();
 let x, y, w, h;
+let xNum, yNum;
 const wkps = new Array(50); // white key points（白鍵y座標　配列）
 const Mwkps = new Array(50); // Mouse white key points（白鍵マウス館y座標　配列）
 const bkps = new Array(35); // black key points（黒鍵y座標　配列）
@@ -44,7 +45,7 @@ async function main() {
     await move_notes();
     await edit();
     document.getElementById('loading').style.display = 'none';
-    
+
     // デバッグ用関数
     viewer_debug();
 }
@@ -464,7 +465,7 @@ function notes_data_update_tempo() {
         if (notes_data[i] == 'deleted' || notes_data[i] == null) continue;
         notes_data[i].dur = Number(((60 / tempo) * notes_data[i].crap).toFixed(3));
         const wait_page_second = 60 / tempo * 16;
-        notes_data[i].start = ((notes_data[i].page - 1) * wait_page_second) + (xps.indexOf(Number(notes_data[i].pos.x))) * (60 / tempo / 8);
+        notes_data[i].start = ((notes_data[i].page - 1) * wait_page_second) + Number(notes_data[i].pos.x_num) * (60 / tempo / 8);
     }
 }
 
@@ -527,26 +528,40 @@ function left_bottom_ui_update() {
 
 function paint_notes_again() {
     const canvas_put_notes = document.getElementById('put_notes');
+    const grid_width_half = canvas_put_notes.getBoundingClientRect().width / 128;
+    const grid_height = canvas_put_notes.getBoundingClientRect().height / 59;
     const pn_ctx = canvas_put_notes.getContext('2d');
     pn_ctx.clearRect(0, 0, canvas_put_notes.width, canvas_put_notes.height);
     if (notes_data.every(v => v === 'deleted' || v == null)) return;
 
     notes_data.forEach(notes => {
         if (notes == 'deleted') return;
-        let notes_x = notes.pos.x;
-        let notes_y = notes.pos.y;
-        let notes_w = notes.pos.w;
-        let notes_h = notes.pos.h;
+        let notes_x = Number(xps[notes.pos.x_num]);
+        let notes_w = grid_width_half * 8 * notes.crap;
+        let notes_y, notes_h;
+
+        if (notes.key_type == 'W') {
+            notes_y = Number(wkps[notes.pos.y_num]) - (grid_height / 2);
+            notes_h = grid_height;
+        } else if (notes.key_type == 'B') {
+            notes_y = Number(bkps[notes.pos.y_num]) - (grid_height * 0.6 / 2);
+            notes_h = grid_height * 0.6;
+        } else if (notes.key_type == 'D') {
+            notes_y = Number(dkps[notes.pos.y_num]) - (grid_height / 2);
+            notes_h = grid_height;
+        }
 
         if (notes.page == page) {
             if (
-                (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h) || 
-                (bar_x >= notes_x && bar_x <= notes_x + notes_w)
+                (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h) ||
+                (bar_x >= notes_x && bar_x <= notes_x + notes_w) &&
+                playing
             ) {
-                pn_ctx.fillStyle = notes.notes_type == 'B' ? `#${lighten_color(darken_color(notes.color.replace(/^#/, '').replace(/^#/, ''), 34), 34)}aa` : `#${lighten_color(notes.color.replace(/^#/, ''), 34)}aa`;
+                pn_ctx.fillStyle = notes.key_type == 'B' ? `#${lighten_color(darken_color(notes.color.replace(/^#/, ''), 34), 34)}` : `#${lighten_color(notes.color.replace(/^#/, ''), 34)}`;
             } else {
-                pn_ctx.fillStyle = notes.notes_type == 'B' ? `#${darken_color(notes.color.replace(/^#/, ''), 34)}aa` : `#${notes.color.replace(/^#/, '')}aa`;
+                pn_ctx.fillStyle = notes.key_type == 'B' ? `#${darken_color(notes.color.replace(/^#/, ''), 34)}` : `#${notes.color.replace(/^#/, '')}`;
             }
+
             pn_ctx.fillRect(notes_x, notes_y, notes_w, notes_h);
         }
     });
@@ -639,6 +654,7 @@ async function editor_grid_prepare() {
     });
 
     function paint_notes_loop() {
+        position_save(canvas_grid);
         paint_notes_again();
         requestAnimationFrame(paint_notes_loop);
     }
@@ -657,7 +673,10 @@ function resize_stage(canvas_grid, canvas_put_notes, canvas_move_notes, div_moda
             height: white_keyboards.height + drums_keyboards.height
         });
     });
+}
 
+function position_save(canvas_grid) {
+    const white_keyboards = document.getElementById('white_keyboards').getBoundingClientRect();
     const white_keys = document.querySelectorAll('#white_keyboards .white_key');
     white_keys.forEach((key, i) => wkps[i] = key.offsetTop + key.offsetHeight / 2);
     const black_keys = document.querySelectorAll('#black_keyboards .black_key');
@@ -879,12 +898,7 @@ function move_notes() {
         mouse_x = event.clientX - canvas_rect.left;
         mouse_y = event.clientY - canvas_rect.top;
 
-        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover') || playing) {
-            mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
-            return;
-        }
-
-        if (mouse_x <= 0 || mouse_y <= 0) {
+        if (mode != 'create' || top_ui.matches(':hover') || bottom_ui.matches(':hover') || playing || mouse_x <= 0 || mouse_y <= 0) {
             mn_ctx.clearRect(0, 0, canvas_move_notes.width, canvas_move_notes.height);
             return;
         }
@@ -899,25 +913,29 @@ function move_notes() {
         const Mdk_min = Math.min(...Mdkps);
         const Mxp_min = Math.min(...Mxps);
         x = xps[Mxps.indexOf(Mxp_min)];
+        xNum = Mxps.indexOf(Mxp_min);
         w = grid_width * beat;
         const wait_page_second = 60 / tempo * 16;
         start = ((page - 1) * wait_page_second) + (Mxps.indexOf(Mxp_min)) * (60 / tempo / 8);
 
         if ((Mdk_min < Mwk_min) && (Mdk_min < Mbk_min)) {
-            mn_ctx.fillStyle = `#${color.replace(/^#/, '')}aa`;
+            mn_ctx.fillStyle = `#${color.replace(/^#/, '')}77`;
             y = dkps[Mdkps.indexOf(Mdk_min)] - (grid_height / 2);
+            yNum = Mdkps.indexOf(Mdk_min);
             h = grid_height;
             key_type = 'D';
             pitch = pitch_data.drum[Mdkps.indexOf(Mdk_min)];
         } else if (Mwk_min < Mbk_min) {
-            mn_ctx.fillStyle = `#${color.replace(/^#/, '')}aa`;
+            mn_ctx.fillStyle = `#${color.replace(/^#/, '')}77`;
             y = wkps[Mwkps.indexOf(Mwk_min)] - (grid_height / 2);
+            yNum = Mwkps.indexOf(Mwk_min);
             h = grid_height;
             key_type = 'W';
             pitch = pitch_data.white[Mwkps.indexOf(Mwk_min)];
         } else {
-            mn_ctx.fillStyle = `#${darken_color(color.replace(/^#/, ''), 34)}aa`;
+            mn_ctx.fillStyle = `#${darken_color(color.replace(/^#/, ''), 34)}77`;
             y = bkps[Mbkps.indexOf(Mbk_min)] - (grid_height * 0.6 / 2);
+            yNum = Mbkps.indexOf(Mbk_min);
             h = grid_height * 0.6;
             key_type = 'B';
             pitch = pitch_data.black[Mbkps.indexOf(Mbk_min)];
@@ -960,6 +978,8 @@ function lighten_color(hex, percent) {
 
 function edit() {
     const move_notes = document.getElementById('move_notes');
+    const grid_width_half = move_notes.getBoundingClientRect().width / 128;
+    const grid_height = move_notes.getBoundingClientRect().height / 59;
 
     move_notes.addEventListener('click', () => {
         if (playing) return;
@@ -970,10 +990,8 @@ function edit() {
                 notes_data.push({
                     id: clone,
                     pos: {
-                        x: x,
-                        y: y,
-                        w: w,
-                        h: h
+                        x_num: xNum,
+                        y_num: yNum
                     },
                     inst: current_instrument,
                     key_type: key_type,
@@ -990,7 +1008,7 @@ function edit() {
                 Nplayed.push(false);
                 clone++;
                 left_bottom_ui_update();
-                console.log(notes_data);
+                // console.log(notes_data);
                 break;
 
             case 'delete':
@@ -998,14 +1016,24 @@ function edit() {
 
                 notes_data.forEach(notes => {
                     if (notes == 'deleted') return;
-                    let notes_x = notes.pos.x;
-                    let notes_y = notes.pos.y;
-                    let notes_w = notes.pos.w;
-                    let notes_h = notes.pos.h;
+                    let notes_x = Number(xps[notes.pos.x_num]);
+                    let notes_w = grid_width_half * 8 * notes.crap;
+                    let notes_y, notes_h;
+
+                    if (notes.key_type == 'W') {
+                        notes_y = Number(wkps[notes.pos.y_num]) - (grid_height / 2);
+                        notes_h = grid_height;
+                    } else if (notes.key_type == 'B') {
+                        notes_y = Number(bkps[notes.pos.y_num]) - (grid_height * 0.6 / 2);
+                        notes_h = grid_height * 0.6;
+                    } else if (notes.key_type == 'D') {
+                        notes_y = Number(dkps[notes.pos.y_num]) - (grid_height / 2);
+                        notes_h = grid_height;
+                    }
 
                     if (mouse_x >= notes_x && mouse_x <= notes_x + notes_w && mouse_y >= notes_y && mouse_y <= notes_y + notes_h && notes.page == page) {
                         notes_data[Number(notes.id)] = 'deleted';
-                        console.log(notes_data);
+                        // console.log(notes_data);
                     }
                 });
 
@@ -1031,6 +1059,8 @@ function viewer_debug() {
             notes_y：${Math.round(y)}
             notes_w：${Math.round(w)}
             notes_h：${Math.round(h)}
+            notes_x_num：${xNum}
+            notes_y_num：${yNum}
             inst：${current_instrument.name}
             key_type：${key_type}
             pitch：${pitch}
