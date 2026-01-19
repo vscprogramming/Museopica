@@ -442,7 +442,7 @@ function play_music() {
                     play_drum(drums[notes_data[i].pitch - 1], notes_data[i].vol);
                 } else {
                     // 白鍵 / 黒鍵
-                    instruments[instruments.findIndex(row => row.name === notes_data[i].name)].play(Number(notes_data[i].pitch) + key, audio_context_inst.currentTime, {
+                    instruments[instruments.findIndex(row => row.name === notes_data[i].inst.name)].play(Number(notes_data[i].pitch) + key, audio_context_inst.currentTime, {
                         gain: Number(notes_data[i].vol),
                         duration: Number(notes_data[i].dur)
                     });
