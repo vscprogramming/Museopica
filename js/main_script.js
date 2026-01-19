@@ -144,10 +144,10 @@ async function top_UI_prepare() {
         try {
             const text_data = await file.text();
             const json_data = JSON.parse(text_data);
-            const support_ver = ['1.0.2', '1.1'];
+            const support_ver = '2.0';
 
             // 読み込み処理に移行
-            if (!support_ver.includes(String(json_data.var))) {
+            if (!support_ver === json_data.var) {
                 alert('このバージョンはサポートされていません。');
                 return;
             }
