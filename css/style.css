@@ -405,6 +405,8 @@ html, body {
 
 .file_opts:hover { background-color: #aaa; }
 
+#load_input { display: none; }
+
 /* === デバッグ関係 === */
 
 #info {

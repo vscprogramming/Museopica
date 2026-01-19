@@ -8,10 +8,10 @@ let mode, current_instrument, key_type, pitch, crap, duration, vol, color, tempo
 let notes = 0, clone = 0, played_notes = 0, time = '0:00:00.000', hour, minute, second, page = 1, layer = 1;
 let start;
 let start_time_bar, start_time, elapsed_time_bar, elapsed_time;
-const notes_data = [];
-const Nplayed = [];
+var notes_data = [];
+var Nplayed = [];
 
-const page_options = Array.from({ length: 100 }, () => ({
+var page_options = Array.from({ length: 100 }, () => ({
     tempo: 100,
     key: 0,
     change_time: 0,
@@ -20,7 +20,7 @@ const page_options = Array.from({ length: 100 }, () => ({
     displayed_measure: 4
 }));
 
-const Pchanged = new Array(page_options.length).fill(false);
+var Pchanged = new Array(page_options.length).fill(false);
 tempo_change();
 let x, y, w, h;
 let xNum, yNum;
@@ -86,7 +86,7 @@ function keys_generation() {
 }
 
 async function top_UI_prepare() {
-    // ファイルボタン押下時
+    // ファイルボタンクリック時
     const file_btn = document.getElementById('file_btn');
     const modal_back = document.getElementById('modal_back');
 
@@ -97,7 +97,7 @@ async function top_UI_prepare() {
 
     modal_back.addEventListener('click', () => modal_back.classList.remove('show'));
 
-    // 保存ボタン押下時
+    // 保存ボタンクリック時
     const save_opt = document.getElementById('save_opt');
 
     save_opt.addEventListener('click', () => {
@@ -126,6 +126,51 @@ async function top_UI_prepare() {
 
         a.click();
         URL.revokeObjectURL(save_data_URL);
+    });
+
+    // 読み込みボタンクリック時
+    const load_opt = document.getElementById('load_opt');
+    const load_input = document.getElementById('load_input');
+
+    load_opt.addEventListener('click', () => load_input.click());
+
+    load_input.addEventListener('change', async () => {
+        const file = load_input.files[0];
+        if (!file) {
+            alert(`JSONファイル：${file.name}\nの読み込みに失敗しました。`)
+            return;
+        }
+
+        try {
+            const text_data = await file.text();
+            const json_data = JSON.parse(text_data);
+            const support_ver = ['1.0.2', '1.1'];
+
+            // 読み込み処理に移行
+            if (!support_ver.includes(String(json_data.var))) {
+                alert('このバージョンはサポートされていません。');
+                return;
+            }
+
+            notes_data = [];
+            Nplayed = [];
+            page_options = Array(100).fill(null);
+            Pchanged = Array(page_options.length).fill(false);
+
+            json_data.notes.forEach(notes => {
+                if (notes == null || notes == 'deleted') return;
+                notes_data.push(notes);
+                Nplayed.push(false);
+            });
+
+            json_data.page_options.forEach((page, i) => page_options[i] = page);
+            
+        } catch(e) {
+            alert(`JSONファイル：${file.name}\nの読み込みに失敗しました。`)
+        }
+
+        left_bottom_ui_update();
+        notes_data_update_tempo()
     });
 
     // モード切替ボタン処理
@@ -163,6 +208,8 @@ async function top_UI_prepare() {
                 src: 'assets/img/svg/ctrl_play.svg',
                 alt: 'play'
             });
+
+            left_bottom_ui_update();
         }
     });
 
@@ -395,7 +442,7 @@ function play_music() {
                     play_drum(drums[notes_data[i].pitch - 1], notes_data[i].vol);
                 } else {
                     // 白鍵 / 黒鍵
-                    notes_data[i].inst.play(Number(notes_data[i].pitch) + key, audio_context_inst.currentTime, {
+                    instruments[instruments.findIndex(row => row.name === notes_data[i].name)].play(Number(notes_data[i].pitch) + key, audio_context_inst.currentTime, {
                         gain: Number(notes_data[i].vol),
                         duration: Number(notes_data[i].dur)
                     });
@@ -469,6 +516,7 @@ function notes_data_update_tempo() {
     }
 }
 
+// テンポ一括変更用（削除予定）
 function tempo_change() {
     for (let i = 0; i < page_options.length; i++) page_options[i].change_time = 60 / tempo * 16;
 }
@@ -993,7 +1041,7 @@ function edit() {
                         x_num: xNum,
                         y_num: yNum
                     },
-                    inst: current_instrument,
+                    inst: current_instrument.name,
                     key_type: key_type,
                     pitch: pitch,
                     dur: duration,
